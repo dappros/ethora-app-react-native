@@ -53,7 +53,7 @@ const SocialButtons = ({
     >
       {facebookSignIn && (
         <View accessibilityLabel="Sign in with Facebook">
-          <SocialButton
+          {/* <SocialButton
             border={border}
             icon={
               <Icon
@@ -72,12 +72,12 @@ const SocialButtons = ({
                 socialLoginType.FACEBOOK
               );
             }}
-          />
+          /> */}
         </View>
       )}
       {appleSignIn && (
         <View accessibilityLabel="Sign in with Apple">
-          <SocialButton
+          {/* <SocialButton
             border={border}
             icon={
               <Icon
@@ -89,15 +89,15 @@ const SocialButtons = ({
               />
             }
             onPress={onAppleButtonPress}
-          />
+          /> */}
         </View>
       )}
       <View accessibilityLabel="Sign in with Metamask">
-        <SocialButton
+        {/* <SocialButton
           border={border}
           icon={<MetamaskIcon width={hp("2.8%")} height={hp("2.8%")} />}
           // onPress={connectMetamask}
-        />
+        /> */}
       </View>
       <WalletConnectModal
         projectId={projectId}

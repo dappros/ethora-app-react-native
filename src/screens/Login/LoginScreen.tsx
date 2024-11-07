@@ -49,17 +49,17 @@ const LoginScreen = observer(({ navigation }: LoginScreenProperties) => {
   const { isFetching } = loginStore;
   const route = useRoute();
 
-  const [externalWalletModalData, setExternalWalletModalData] = useState({
+  const [externalWalletModalData, setExternalWalletModalData] = useState<Record<string, string | undefined>>({
     walletAddress: "",
     message: "",
   });
   const [signedMessage, setSignedMessage] = useState("");
   const [defaultLoginOpen, setDefaultLoginOpen] = useState(false);
   const { open, isConnected, provider, address } = useWalletConnectModal();
-  const web3Provider = useMemo(
-    () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
-    [provider]
-  );
+  // const web3Provider = useMemo(
+  //   () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
+  //   [provider]
+  // );
   const {
     firstName,
     lastName,
@@ -105,7 +105,6 @@ const LoginScreen = observer(({ navigation }: LoginScreenProperties) => {
     const walletExist = await checkExternalWalletExist();
     const messageToSend = walletExist ? "Login" : "Registration";
     const res = await signMessage({
-      web3Provider: web3Provider,
       method: "personal_sign",
       message: messageToSend,
     });
@@ -136,15 +135,15 @@ const LoginScreen = observer(({ navigation }: LoginScreenProperties) => {
     }
   };
   const onAppleLogin = async () => {
-    const user = { ...appleUser, firstName, lastName };
+    const user = { ...appleUser, firstName, lastName, };
 
     const dataObject = {
       loginType: socialLoginType.APPLE,
-      authToken: user.authToken,
-      displayName: user.displayName,
-      password: user.uid,
-      username: user.email,
-      email: user.email,
+      // authToken: user.authToken,
+      // displayName: user.displayName,
+      // password: user.uid,
+      // username: user.email,
+      // email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
     };

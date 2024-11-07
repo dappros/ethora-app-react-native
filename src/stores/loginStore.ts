@@ -399,7 +399,7 @@ export class LoginStore {
 
   //handler to login using external wallets
   loginExternalWallet = async (body: {
-    walletAddress: string;
+    walletAddress: string | undefined;
     signature: string;
     msg: string;
     loginType: string;
@@ -491,7 +491,7 @@ export class LoginStore {
 
   //handle to register a new user using external wallet
   registerExternalWalletUser = async (body: {
-    walletAddress: string;
+    walletAddress: string | undefined;
     firstName: string;
     lastName: string;
     loginType: string;

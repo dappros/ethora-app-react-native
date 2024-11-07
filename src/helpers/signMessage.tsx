@@ -19,7 +19,7 @@ export interface AccountAction {
 
 export interface RpcRequestParams {
   method: string;
-  web3Provider: ethers.providers.Web3Provider;
+  web3Provider?: ethers.providers.Web3Provider;
 }
 export interface MessageParams extends RpcRequestParams {
   message: string

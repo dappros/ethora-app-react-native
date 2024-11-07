@@ -29,14 +29,16 @@ import CloseIcon from "../../assets/icons/close.svg";
 import EyeCrossedIcon from "../../assets/icons/eyeCrossed.svg";
 import EyeOpenIcon from "../../assets/icons/eyeOpen.svg";
 import SocialButtons from "../../components/Login/SocialButtons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../../navigation/types";
 import { authStackRoutes } from "../../navigation/routes";
+import { ParamListBase, RouteProp } from "@react-navigation/native";
 
-interface ExtendedScreenProps
-  extends NativeStackScreenProps<AuthStackParamList, "LoginScreen"> {
+interface ExtendedScreenProps {
   isOpen: boolean;
   onClose: () => void;
+  navigation: NativeStackNavigationProp<AuthStackParamList, "LoginScreen", undefined>
+  route: RouteProp<ParamListBase>;
 }
 
 export const RegularLoginModal: FC<ExtendedScreenProps> = ({
@@ -181,7 +183,7 @@ export const RegularLoginModal: FC<ExtendedScreenProps> = ({
                     >
                       <CloseIcon />
                     </TouchableOpacity>
-                  ) : null
+                  ) : undefined
                 }
               />
               <Input

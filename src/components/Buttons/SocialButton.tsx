@@ -5,9 +5,8 @@ You may obtain a copy of the License at https://github.com/dappros/ethora/blob/m
 Note: linked open-source libraries and components may be subject to their own licenses.
 */
 
-import { TouchableOpacity } from "react-native";
 import * as React from "react";
-import { GestureResponderEvent } from "react-native";
+import { GestureResponderEvent, TouchableOpacity } from "react-native";
 
 interface SocialButtonProperties {
   icon?: JSX.Element | JSX.Element[] | undefined;
