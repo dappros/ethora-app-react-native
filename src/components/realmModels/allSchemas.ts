@@ -11,7 +11,7 @@ import Realm from 'realm';
 
 const UserSchema = {
   name: 'User',
-  embeded: true,
+  embedded: true,
   properties: {
     _id: 'string',
     name: 'string',
@@ -20,7 +20,7 @@ const UserSchema = {
 };
 const QuickReplySchema = {
   name: 'QuickReply',
-  embeded: true,
+  embedded: true,
   properties: {
     name: 'string',
     value: 'string',
@@ -29,7 +29,7 @@ const QuickReplySchema = {
 
 const MainMessageSchema = {
   name: 'MainMessage',
-  embeded: true,
+  embedded: true,
   properties: {
     text: {type: 'string', optional: true},
     id: {type: 'string', optional: true},
@@ -85,7 +85,7 @@ const MessageSchema = {
     fileName: {type: 'string', optional: true},
     originalName: {type: 'string', optional: true},
     isReply: {type: 'bool', optional: true},
-    mainMessage: {type: 'MainMessage', optional: true},
+    mainMessage: {type: 'object', objectType: 'MainMessage', optional: true},
     numberOfReplies: {type: 'int', optional: true},
     showInChannel: {type: 'bool', optional: true},
     preview: {type: 'string', optional: true},
@@ -104,7 +104,7 @@ const ChatListSchema = {
     counter: 'int',
     lastUserText: 'string',
     lastUserName: 'string',
-    createdAt:{type: 'date?', optional: true},
+    createdAt: {type: 'date', optional: true},
     priority: {type: 'int', optional: true},
     muted: {type: 'bool', optional: true},
     roomThumbnail: {type: 'string', optional: true},
