@@ -12,6 +12,7 @@ import NetInfo from '@react-native-community/netinfo';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import AppComponent from './src/App';
 import {StoreProvider} from './src/stores/context';
+import { View, Text } from 'react-native';
 
 declare var global: any;
 global.NetInfo = NetInfo;
@@ -25,9 +26,7 @@ function App(): React.JSX.Element {
 
   return (
     <StoreProvider>
-      <SafeAreaView style={backgroundStyle}>
         <AppComponent />
-      </SafeAreaView>
     </StoreProvider>
   );
 }
