@@ -7,7 +7,8 @@ Note: linked open-source libraries and components may be subject to their own li
 
 import PropTypes from "prop-types";
 import React from "react";
-import { View, ViewPropTypes, StyleSheet } from "react-native";
+import { View, StyleSheet, ViewStyle } from "react-native";
+import { ViewPropTypes } from 'deprecated-react-native-prop-types';
 
 import { Avatar, Day, utils, SystemMessage } from "react-native-gifted-chat";
 import { textStyles } from "../../../docs/config";
@@ -81,6 +82,7 @@ export default class Message extends React.Component {
   }
 
   render() {
+    console.log("props", this.props);
     const { currentMessage, nextMessage, position, containerStyle } =
       this.props;
     if (currentMessage) {

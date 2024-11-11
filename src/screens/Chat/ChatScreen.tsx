@@ -8,6 +8,7 @@ import { IMessage, roomListProps } from "../../stores/chatStore";
 import { View } from "native-base";
 
 const ChatScreen = observer(({ route }: any) => {
+  console.log("ChatScreen", ChatScreen);
   const { chatStore } = useStores();
 
   const { chatJid, chatName } = route.params;
@@ -83,12 +84,12 @@ const ChatScreen = observer(({ route }: any) => {
 
   return (
     <View testID="ChatScreen">
-      <ChatContainer
+      {/* <ChatContainer
         containerType="main"
         roomDetails={room}
         messages={messages}
         onLoadEarlier={onLoadEarlier}
-      />
+      /> */}
     </View>
   );
 });

@@ -122,7 +122,7 @@ export const DocumentHistoryScreen = ({route, navigation}: ScreenProps) => {
     <Fragment>
       <SecondaryHeader title="Document details" />
 
-      <View style={{...styles.contentContainer, margin: 0}}>
+      <View style={[styles.contentContainer, {margin: 0}]}>
         <VStack paddingTop={5} paddingX={5}>
           <VStack
             justifyContent={'center'}
@@ -198,7 +198,7 @@ export const DocumentHistoryScreen = ({route, navigation}: ScreenProps) => {
         <TouchableOpacity
           disabled={loading}
           // onPress={onMintClick}
-          style={{...styles.createButton, height: hp('5%'), borderRadius: 0}}>
+          style={[styles.createButton, {height: hp('5%'), borderRadius: 0}]}>
           <VStack justifyContent={'center'} alignItems={'center'} flex={1}>
             {loading ? (
               <ActivityIndicator

@@ -14,7 +14,7 @@ import {
   StyleSheet,
 } from "react-native";
 import TransactionListTab from "../../components/Transactions/TransactionsList";
-import SkeletonContent from "react-native-skeleton-content-nonexpo";
+// import SkeletonContent from "react-native-skeleton-content-nonexpo";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -277,11 +277,11 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
             bgColor={primaryColor}
             borderRadius={hp("10.46%") / 2}
           >
-            <SkeletonContent
+            {/* <SkeletonContent
               containerStyle={{ alignItems: "center" }}
               layout={firstLayout}
               isLoading={isLoadingVCard}
-            >
+            > */}
               <Avatar
                 bg={commonColors.primaryColor}
                 size={"xl"}
@@ -296,7 +296,7 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
                 {loginStore.anotherUserFirstname[0] +
                   loginStore.anotherUserLastSeen[0]}
               </Avatar>
-            </SkeletonContent>
+            {/* </SkeletonContent> */}
           </HStack>
         </View>
         <View style={{ flex: 1, marginTop: hp("5.5%") }}>
@@ -308,13 +308,13 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
             height={hp("75%")}
           >
             <View style={{ alignItems: "center", marginTop: hp("5.54%") }}>
-              <SkeletonContent
+              {/* <SkeletonContent
                 containerStyle={{ width: wp("100%"), alignItems: "center" }}
                 layout={[
                   { width: wp("30%"), height: hp("2.216%"), marginBottom: 6 },
                 ]}
                 isLoading={isLoadingVCard}
-              >
+              > */}
                 <HStack>
                   <Text
                     style={{
@@ -353,7 +353,7 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
                     </Text>
                   </TouchableOpacity>
                 </HStack>
-              </SkeletonContent>
+              {/* </SkeletonContent> */}
               <View
                 style={{ padding: hp("4%"), paddingBottom: 0, paddingTop: 0 }}
               >
@@ -364,11 +364,11 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
                     paddingTop: 0,
                   }}
                 >
-                  <SkeletonContent
+                  {/* <SkeletonContent
                     containerStyle={{ width: wp("100%"), alignItems: "center" }}
                     layout={[{ width: wp("60%"), height: 70, marginBottom: 6 }]}
                     isLoading={isLoadingVCard}
-                  >
+                  > */}
                     <Text style={styles.descriptionText}>
                       {otherUserStore.description}
                     </Text>
@@ -389,14 +389,14 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
                         </Text>
                       </HStack>
                     </TouchableOpacity>
-                  </SkeletonContent>
+                  {/* </SkeletonContent> */}
                 </View>
               </View>
             </View>
 
             <View>
               <View style={{ padding: wp("4%") }}>
-                <SkeletonContent
+                {/* <SkeletonContent
                   isLoading={isLoading}
                   containerStyle={{
                     width: "100%",
@@ -405,11 +405,11 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
                   layout={[
                     { width: wp("90%"), height: hp("2.216%"), marginBottom: 6 },
                   ]}
-                >
+                > */}
                   <View style={{ flexDirection: "row" }}></View>
-                </SkeletonContent>
+                {/* </SkeletonContent> */}
               </View>
-              <SkeletonContent
+              {/* <SkeletonContent
                 isLoading={isLoading}
                 containerStyle={{
                   width: "100%",
@@ -419,9 +419,9 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
                 layout={[
                   { width: wp("90%"), height: hp("30%"), marginBottom: 6 },
                 ]}
-              >
+              > */}
                 {loadTabContent()}
-              </SkeletonContent>
+              {/* </SkeletonContent> */}
             </View>
           </VStack>
         </View>

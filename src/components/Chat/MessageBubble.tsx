@@ -24,7 +24,6 @@ import { QuickReplies } from "./QuickReplies";
 import { MessageText } from "./MessageText";
 import { Box, HStack, Text, View } from "native-base";
 import { observer } from "mobx-react-lite";
-import { containerType } from "./ChatContainer";
 import { IMessage, roomListProps } from "../../stores/chatStore";
 import { isSameDay, isSameUser } from "../../helpers/chat/chatUtils";
 import { useStores } from "../../stores/context";
@@ -60,7 +59,7 @@ interface BubbleProps {
   timeProps?: any;
   usernameProps?: any;
   messageImageProps?: any;
-  containerType: containerType;
+  containerType: "main" | "thread";
   scrollToParentMessage: any;
   handleReply: (message: any) => void;
 }

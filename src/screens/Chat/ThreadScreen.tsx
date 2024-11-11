@@ -18,12 +18,12 @@ const ThreadScreen = observer((props: any) => {
     .sort((a: any, b: any) => b._id - a._id);
   return (
     <>
-      <ChatContainer
+      {/* <ChatContainer
         containerType="thread"
         messages={messages}
         roomDetails={room as roomListProps}
         currentThreadMessage={currentMessage}
-      />
+      /> */}
     </>
   );
 });

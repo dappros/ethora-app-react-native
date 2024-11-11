@@ -7,8 +7,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import SkeletonContent from "react-native-skeleton-content-nonexpo";
-import { ICustomViewStyle } from "react-native-skeleton-content-nonexpo/lib/Constants";
+// import SkeletonContent from "react-native-skeleton-content-nonexpo";
+// import { ICustomViewStyle } from "react-native-skeleton-content-nonexpo/lib/Constants";
 import { useStores } from "../../stores/context";
 import DocumentPicker from "react-native-document-picker";
 import { changeUserData, fileUpload } from "../../config/routesConstants";
@@ -572,11 +572,11 @@ const MainProfile: React.FC<TMainProfile> = observer((props) => {
             bgColor={primaryColor}
             borderRadius={hp("10.46%") / 2}
           >
-            <SkeletonContent
+            {/* <SkeletonContent
               containerStyle={{ alignItems: "center" }}
               layout={firstLayout}
               isLoading={isLoadingVCard}
-            >
+            > */}
               <TouchableOpacity
                 disabled={profileType === "other"}
                 onPress={onAvatarPress}
@@ -590,7 +590,7 @@ const MainProfile: React.FC<TMainProfile> = observer((props) => {
                   {firstNameLocal[0] + lastNameLocal[0]}
                 </Avatar>
               </TouchableOpacity>
-            </SkeletonContent>
+            {/* </SkeletonContent> */}
           </HStack>
         </View>
 
@@ -667,11 +667,11 @@ const MainProfile: React.FC<TMainProfile> = observer((props) => {
               </TouchableOpacity>
             </HStack>
             <HStack paddingX={wp("4%")}>
-              <SkeletonContent
+              {/* <SkeletonContent
                 containerStyle={{ width: wp("100%"), alignItems: "center" }}
                 layout={[{ width: wp("60%"), height: 70, marginBottom: 6 }]}
                 isLoading={isLoadingVCard}
-              >
+              > */}
                 <HyperLink
                   onPress={(url: string) =>
                     profileType === "my" && handleChatLinks(url)
@@ -719,12 +719,12 @@ const MainProfile: React.FC<TMainProfile> = observer((props) => {
                     </TouchableOpacity>
                   )}
                 </HyperLink>
-              </SkeletonContent>
+              {/* </SkeletonContent> */}
             </HStack>
           </View>
 
           <View style={{ backgroundColor: "white" }}>
-            <SkeletonContent
+            {/* <SkeletonContent
               isLoading={isLoading}
               containerStyle={{
                 width: "100%",
@@ -734,9 +734,9 @@ const MainProfile: React.FC<TMainProfile> = observer((props) => {
               layout={[
                 { width: wp("90%"), height: hp("30%"), marginBottom: 6 },
               ]}
-            >
+            > */}
               {loadTabContent()}
-            </SkeletonContent>
+            {/* </SkeletonContent> */}
           </View>
         </VStack>
       </View>

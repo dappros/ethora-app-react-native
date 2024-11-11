@@ -198,7 +198,7 @@ export const HomeStackScreen = observer(() => {
           // },
         })}
       />
-      {/* 
+      
       <HomeStack.Screen
         name={'ChatScreen'}
         component={ChatScreen}
@@ -315,14 +315,14 @@ export const HomeStackScreen = observer(() => {
           header: ({}) => <MainHeader />,
         })}
       />
-      <HomeStack.Screen
+      {/* <HomeStack.Screen
         name={'ThreadScreen'}
         component={ThreadScreen}
         options={() => ({
           // header: ({}) => <MainHeader />,
           headerShown: false,
         })}
-      />
+      /> */}
       <HomeStack.Screen
         name={'ChangeBackgroundScreen'}
         component={ChangeBackgroundScreen}
@@ -344,7 +344,7 @@ export const HomeStackScreen = observer(() => {
         options={() => ({
           header: ({}) => <MainHeader />,
         })}
-      /> */}
+      />
     </HomeStack.Navigator>
   );
 });

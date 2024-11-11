@@ -76,7 +76,6 @@ import { ChatLongTapModal } from "../Modals/Chat/ChatLongTapModal";
 import { QRModal } from "../Modals/QR/QRModal";
 import { ChatMediaModal } from "../Modals/ChatMediaModal";
 import { MetaNavigation } from "./MetaNavigation";
-import { NftItemGalleryModal } from "../../../NftItemGalleryModal";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { IDataForTransfer } from "../Modals/Chat/types";
 import { observer } from "mobx-react-lite";
@@ -1396,12 +1395,6 @@ const ChatContainer = observer((props: ChatContainerProps) => {
             paddingBottom: 42,
             backgroundColor: "#E8EDF2",
           }}
-        />
-        <NftItemGalleryModal
-          onItemPress={sendNftItemsFromGallery}
-          isModalVisible={isNftItemGalleryVisible}
-          nftItems={walletStore.nftItems}
-          closeModal={() => setIsNftItemGalleryVisible(false)}
         />
         <Actionsheet
           isOpen={isOpen}

@@ -6,7 +6,7 @@ import {coinImagePath, commonColors, textStyles} from '../../../docs/config';
 import {Button} from '../../components/Button';
 import SecondaryHeader from '../../components/SecondaryHeader/SecondaryHeader';
 import {HStack} from 'native-base';
-import {requestPurchase, useIAP} from 'react-native-iap';
+// import {requestPurchase, useIAP} from 'react-native-iap';
 import {useStores} from '../../stores/context';
 import {httpPost} from '../../config/apiService';
 import {showError, showSuccess} from '../../components/Toast/toast';
@@ -62,43 +62,44 @@ const productIds = [
 const appleKey = '426b7e2459d74037962e34f57375dfe2';
 export const CoinPurchaseScreen: React.FC<ICoinPurchaseScreen> = ({}) => {
   const {loginStore, walletStore} = useStores();
-  const {
-    connected,
+  // const {
+  //   connected,
 
-    finishTransaction,
-    getProducts,
-  } = useIAP();
+  //   finishTransaction,
+  //   getProducts,
+  // } = useIAP();
+
   const requestCoinPurchase = async (id: string) => {
     try {
-      const transaction = await requestPurchase({sku: id});
-      if(transaction) {
-        await finishTransaction({purchase: transaction});
-        const res = await httpPost(
-          '/users/payments',
-          {
-            type: 'purchase',
-            transaction: transaction,
-            platform: Platform.OS,
-            password: Platform.OS === 'ios' ? appleKey : '',
-          },
-          loginStore.userToken,
-        );
-        await walletStore.fetchWalletBalance(loginStore.userToken, true);
-        console.log(res.data);
-        showSuccess('Succes', 'Please, check your balance');
-      }
+      // const transaction = await requestPurchase({sku: id});
+      // if(transaction) {
+      //   await finishTransaction({purchase: transaction});
+      //   const res = await httpPost(
+      //     '/users/payments',
+      //     {
+      //       type: 'purchase',
+      //       transaction: transaction,
+      //       platform: Platform.OS,
+      //       password: Platform.OS === 'ios' ? appleKey : '',
+      //     },
+      //     loginStore.userToken,
+      //   );
+      //   await walletStore.fetchWalletBalance(loginStore.userToken, true);
+      //   console.log(res.data);
+      //   showSuccess('Succes', 'Please, check your balance');
+      // }
      
     } catch (err) {
       showError('Error', 'Please try again');
     }
   };
 
-  useEffect(() => {
-    if (connected) {
-      getProducts({skus: productIds});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected]);
+  // useEffect(() => {
+  //   if (connected) {
+  //     getProducts({skus: productIds});
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [connected]);
   return (
     <View>
       <SecondaryHeader title={'Buy Coins'} />

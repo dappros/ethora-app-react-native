@@ -126,18 +126,12 @@ const DebugScreenApi = ({navigation}) => {
 
         <View style={styles.selectContainer}>
           <Text
-            style={{
-              ...styles.textStyle,
-              left: 5,
-            }}>
+            style={[styles.textStyle, {left: 5}]}>
             {' '}
             Api mode
           </Text>
           <Text
-            style={{
-              ...styles.textStyle,
-              right: 40,
-            }}>
+            style={[styles.textStyle, {right: 40}]}>
             {' '}
             {apiMode}
           </Text>

@@ -79,7 +79,7 @@ export const RoomList: React.FC<IRoomList> = observer(
           alignItems: "center",
         }}
       >
-        <RoomsHeader style={undefined} />
+        <RoomsHeader/>
         <AnimatedRoomCategoryBlock
           handleSearchChange={handleSearchChange}
           searchValue={searchValue}

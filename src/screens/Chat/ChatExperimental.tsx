@@ -1047,18 +1047,18 @@ const ChatScreen = observer(({ route, navigation }: any) => {
           ]}
         />
 
-        <TransactionModal
+        {/* <TransactionModal
           type={modalType}
           closeModal={closeModal}
           extraData={extraData}
           isVisible={showModal}
-        />
-        <NftItemGalleryModal
+        /> */}
+        {/* <NftItemGalleryModal
           onItemPress={sendNftItemsFromGallery}
           isModalVisible={isNftItemGalleryVisible}
           nftItems={walletStore.nftItems}
           closeModal={() => setIsNftItemGalleryVisible(false)}
-        />
+        /> */}
         <Actionsheet
           isOpen={isOpen}
           onClose={() => {

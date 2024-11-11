@@ -3,3 +3,7 @@ declare module 'react-native-slider';
 declare module '@xmpp/client';
 declare module 'pngjs/browser';
 declare module 'diff';
+declare module 'react-native-video-player';
+declare module 'string.prototype.matchall';
+declare module 'react-native-pulse';
+declare module 'deprecated-react-native-prop-types';

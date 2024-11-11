@@ -11,6 +11,7 @@ import { RootStackParamList } from "./types";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootStack = observer(() => {
+  console.log("RootStack", RootStack);
   const { loginStore } = useStores();
   const {
     setTokenFromAsyncStorage,

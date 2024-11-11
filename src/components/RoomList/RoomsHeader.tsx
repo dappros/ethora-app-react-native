@@ -8,7 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native';
 import {homeStackRoutes} from '../../navigation/routes';
 
-const RoomsHeader = ({style}) => {
+const RoomsHeader = ({style}: {style?: Record<string, string | number>}) => {
   const {loginStore} = useStores();
   const navigation = useNavigation<HomeStackNavigationProperty>();
 
@@ -18,7 +18,7 @@ const RoomsHeader = ({style}) => {
 
   return (
     <Box
-      style={{
+      style={[style, {
         borderBottomLeftRadius: 15,
         borderBottomRightRadius: 15,
         zIndex: 2,
@@ -27,8 +27,7 @@ const RoomsHeader = ({style}) => {
         position: 'absolute',
         top: 0,
         left: 0,
-        ...style,
-      }}
+      }]}
       height={hp('10%')}
       justifyContent={'flex-end'}
       bgColor={'#fff'}

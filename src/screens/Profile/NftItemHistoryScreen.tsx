@@ -135,7 +135,7 @@ const NftItemHistoryScreen = (props: any) => {
       />
 
       <ScrollView style={styles.container}>
-        <View style={{...styles.contentContainer, margin: 0}}>
+        <View style={[styles.contentContainer, { margin: 0 }]}>
           <View style={styles.justifyBetween}>
             <TouchableOpacity
               onPress={onPreviewClick}
