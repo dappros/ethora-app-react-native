@@ -259,6 +259,8 @@ const ChatContainer = observer((props: ChatContainerProps) => {
   const { isOpen, onOpen, onClose } = useDisclose();
   //local states
 
+  console.log("mediaModal", mediaModal);
+
   //local variables
   const mediaButtonAnimation = new Animated.Value(1);
   const path = Platform.select({
@@ -1289,12 +1291,12 @@ const ChatContainer = observer((props: ChatContainerProps) => {
           <SecondaryHeader title="Thread" />
         )}
         {/* @ts-ignore */}
-        {isAudioMimetype(mediaModal.type) && (
+        {/* {isAudioMimetype(mediaModal.type) && (
           <AudioPlayer
             closePlayer={closeMediaModal}
             audioUrl={mediaModal.url}
           />
-        )}
+        )} */}
         {containerType === "thread" && (
           <View bg={commonColors.primaryDarkColor}>
             <RenderMainMessageSection />
@@ -1415,7 +1417,7 @@ const ChatContainer = observer((props: ChatContainerProps) => {
             chatStore.toggleMetaNavigation(false);
           }}
         />
-        <ChatMediaModal
+        {/* <ChatMediaModal
           url={mediaModal.url}
           //@ts-ignore
           type={mediaModal.type}
@@ -1423,7 +1425,7 @@ const ChatContainer = observer((props: ChatContainerProps) => {
           //@ts-ignore
           open={!isAudioMimetype(mediaModal.type) && mediaModal.open}
           messageData={mediaModal.message}
-        />
+        /> */}
         <QRModal
           open={showQrModal}
           onClose={() => setShowQrModal(false)}

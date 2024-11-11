@@ -38,7 +38,7 @@ const {width, height: windowHeight} = Dimensions.get('window');
 //interfaces
 interface IChatMediaModal {
   open: boolean;
-  url: string|undefined;
+  url: string |undefined;
   type: TCombinedMimeType;
   onClose: () => void;
   messageData: any;
@@ -197,7 +197,7 @@ export const ChatMediaModal: React.FC<IChatMediaModal> = observer(
                   height > windowHeight - 50 ? windowHeight - 120 : height,
               }}
               source={{
-                uri: url,
+                uri: url ? url : "",
                 priority: FastImage.priority.normal,
               }}
               resizeMode={FastImage.resizeMode.contain}
@@ -225,7 +225,7 @@ export const ChatMediaModal: React.FC<IChatMediaModal> = observer(
             style={{height: height, width: '100%'}}>
             <VideoPlayer
               video={{
-                uri: url,
+                uri: url ? url : "",
               }}
               autoplay
               videoWidth={wp('100%')}
@@ -240,7 +240,7 @@ export const ChatMediaModal: React.FC<IChatMediaModal> = observer(
         );
       }
       if (pdfMimemtype[type]) {
-        return url&&<PdfViewer uri={url} />;
+        return url&&<PdfViewer uri={url ? url : ""} />;
       }
       return null;
     };

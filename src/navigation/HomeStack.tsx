@@ -277,13 +277,13 @@ export const HomeStackScreen = observer(() => {
           header: ({}) => <MainHeader />,
         })}
       />
-      <HomeStack.Screen
+      {/* <HomeStack.Screen
         name={'NftItemHistory'}
         component={NftItemHistoryScreen}
         options={() => ({
           header: ({}) => <MainHeader />,
         })}
-      />
+      /> */}
       <HomeStack.Screen
         name={'InviteFriendsScreen'}
         component={InviteFriendsScreen}
@@ -315,14 +315,14 @@ export const HomeStackScreen = observer(() => {
           header: ({}) => <MainHeader />,
         })}
       />
-      {/* <HomeStack.Screen
+      <HomeStack.Screen
         name={'ThreadScreen'}
         component={ThreadScreen}
         options={() => ({
           // header: ({}) => <MainHeader />,
           headerShown: false,
         })}
-      /> */}
+      />
       <HomeStack.Screen
         name={'ChangeBackgroundScreen'}
         component={ChangeBackgroundScreen}

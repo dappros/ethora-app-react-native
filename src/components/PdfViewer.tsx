@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, Dimensions, View} from 'react-native';
-import Pdf from 'react-native-pdf';
+// import Pdf from 'react-native-pdf';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 interface PdfViewerProps {
@@ -10,11 +10,11 @@ interface PdfViewerProps {
 export const PdfViewer: React.FC<PdfViewerProps> = ({uri}) => {
   return (
     <View style={styles.container}>
-      <Pdf
+      {/* <Pdf
         trustAllCerts={false}
         source={{uri, cache: true}}
         style={styles.pdf}
-      />
+      /> */}
     </View>
   );
 };

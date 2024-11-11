@@ -8,7 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import Highlighter from 'react-native-highlight-words';
+// import Highlighter from 'react-native-highlight-words';
 
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import {
@@ -60,7 +60,7 @@ const DebugScreenXmpp = ({navigation}) => {
 
       <ScrollView>
         {/* <JSONTree data={textForSearch ? filteredLogs : logs} /> */}
-        <View style={{paddingLeft: 10}}>
+        {/* <View style={{paddingLeft: 10}}>
           {debugStore.xmppLogs
             .filter(log =>
               JSON.stringify(log, getCircularReplacer()).includes(
@@ -81,7 +81,7 @@ const DebugScreenXmpp = ({navigation}) => {
                 />
               );
             })}
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* 
