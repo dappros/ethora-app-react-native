@@ -259,8 +259,6 @@ const ChatContainer = observer((props: ChatContainerProps) => {
   const { isOpen, onOpen, onClose } = useDisclose();
   //local states
 
-  console.log("mediaModal", mediaModal);
-
   //local variables
   const mediaButtonAnimation = new Animated.Value(1);
   const path = Platform.select({
@@ -495,7 +493,6 @@ const ChatContainer = observer((props: ChatContainerProps) => {
         }
       }
     } catch (err) {
-      console.log(err.response);
       // User cancelled the picker, exit any dialogs or menus and move on
       showToast("error", "Error", "Cannot upload file, try again later", "top");
       console.log(err);

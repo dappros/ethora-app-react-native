@@ -1,0 +1,10 @@
+export { default as Copy } from "./Copy.svg";
+export { default as Delete } from "./Delete.svg";
+export { default as Favourites } from "./Favourites.svg";
+export { default as Forward } from "./Forward.svg";
+export { default as Group } from "./Group.svg";
+export { default as Mute } from "./Mute.svg";
+export { default as Reply } from "./Reply.svg";
+export { default as Report } from "./Report.svg";
+export { default as Search } from "./Search.svg";
+export { default as Edit } from "./Edit.svg";

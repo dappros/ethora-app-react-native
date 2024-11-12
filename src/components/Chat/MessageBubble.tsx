@@ -93,6 +93,7 @@ const Bubble = observer((props: BubbleProps) => {
     messageImageProps,
     scrollToParentMessage,
     handleReply,
+    containerType,
   } = props;
 
   const room: roomListProps = chatStore.roomList.find(

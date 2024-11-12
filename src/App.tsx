@@ -6,7 +6,6 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StatusBar} from 'react-native';
 
 const AppComponent = () => {
-  console.log("AppComponent", AppComponent);
   return (
     <NativeBaseProvider>
       <StatusBar />

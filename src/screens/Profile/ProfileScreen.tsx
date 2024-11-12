@@ -30,7 +30,6 @@ import { commonColors, textStyles } from "../../../docs/config";
 import ProfileModal from "../../components/Modals/Profile/ProfileModal";
 import { QRModal } from "../../components/Modals/QR/QRModal";
 import TransactionsList from "../../components/Nft/NftTransactionList";
-import { ProfileTabs } from "../../components/Profile/ProfileTabs";
 import SecondaryHeader from "../../components/SecondaryHeader/SecondaryHeader";
 import { showToast } from "../../components/Toast/toast";
 import { httpUploadPut } from "../../config/apiService";
@@ -266,20 +265,20 @@ export const ProfileScreen = observer(() => {
   };
   // shows profile tabs which contain documents, items... or transactions
   const loadTabContent = () => {
-    if (activeTab === 0) {
-      return (
-        <ProfileTabs
-          activeAssetTab={activeAssetTab}
-          setActiveAssetTab={setActiveAssetTab}
-          documents={walletStore.documents}
-          collections={walletStore.collections}
-          coinsItems={coinData}
-          userWalletAddress={walletAddress}
-          nftItems={walletStore.nftItems}
-          itemsBalance={itemsBalance}
-        />
-      );
-    }
+    // if (activeTab === 0) {
+    //   return (
+    //     <ProfileTabs
+    //       activeAssetTab={activeAssetTab}
+    //       setActiveAssetTab={setActiveAssetTab}
+    //       documents={walletStore.documents}
+    //       collections={walletStore.collections}
+    //       coinsItems={coinData}
+    //       userWalletAddress={walletAddress}
+    //       nftItems={walletStore.nftItems}
+    //       itemsBalance={itemsBalance}
+    //     />
+    //   );
+    // }
 
     if (activeTab === 1) {
       return (

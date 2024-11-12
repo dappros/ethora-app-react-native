@@ -9,7 +9,6 @@ import { View } from "native-base";
 
 const ChatScreen = observer(({ route }: any) => {
   const { chatStore } = useStores();
-  console.log("ChatScreen", chatStore);
 
   const { chatJid, chatName } = route.params;
   const room: roomListProps = chatStore.roomList.find(

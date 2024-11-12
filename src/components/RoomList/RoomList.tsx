@@ -42,9 +42,6 @@ export const RoomList: React.FC<IRoomList> = observer(
       [roomsList, chatStore.roomsInfoMap]
     );
 
-    console.log("chatStore.roomsInfoMap", chatStore.roomsInfoMap);
-    console.log("roomsList", roomsList);
-
     const [allRooms, setAllRooms] = useState([...chatStore.roomList]);
     const [modalVisible, setModalVisible] = useState(false);
 

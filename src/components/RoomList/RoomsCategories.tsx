@@ -101,6 +101,7 @@ const NotificationBadge = ({ count }) => (
 
 const RoomsCategories = () => {
   const { chatStore, loginStore, apiStore } = useStores();
+
   const route = useRoute();
   const navigation = useNavigation<HomeStackNavigationProperty>();
 

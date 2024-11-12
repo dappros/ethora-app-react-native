@@ -1,0 +1,18 @@
+export const colorsChat: string[] = [
+  "#B0E0E6",
+  "#DEB887",
+  "#D8BFD8",
+  "#8FBC8F",
+  "#4682B4",
+  "#FFA07A",
+  "#F4A460",
+  "#BDB76B",
+  "#6A5ACD",
+  "#D2691E",
+  "#2E8B57",
+  "#DB7093",
+  "#A52A2A",
+  "#808000",
+  "#48D1CC",
+  "#483D8B",
+];

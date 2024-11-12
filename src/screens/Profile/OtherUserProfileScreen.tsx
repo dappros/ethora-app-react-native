@@ -34,7 +34,6 @@ import {
 import { underscoreManipulation } from "../../helpers/underscoreLogic";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { filterNftBalances, produceNfmtItems } from "../../stores/walletStore";
-import { ProfileTabs } from "../../components/Profile/ProfileTabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -217,20 +216,20 @@ const OtherUserProfileScreen = observer(({ route }: ScreenProps) => {
   }, [anotherUserWalletAddress]);
 
   const loadTabContent = () => {
-    if (activeTab === 0) {
-      return (
-        <ProfileTabs
-          activeAssetTab={activeAssetTab}
-          setActiveAssetTab={setActiveAssetTab}
-          documents={[]}
-          collections={collections}
-          coinsItems={coinData}
-          userWalletAddress={anotherUserWalletAddress}
-          nftItems={itemsData}
-          itemsBalance={itemsBalance}
-        />
-      );
-    }
+    // if (activeTab === 0) {
+    //   return (
+    //     <ProfileTabs
+    //       activeAssetTab={activeAssetTab}
+    //       setActiveAssetTab={setActiveAssetTab}
+    //       documents={[]}
+    //       collections={collections}
+    //       coinsItems={coinData}
+    //       userWalletAddress={anotherUserWalletAddress}
+    //       nftItems={itemsData}
+    //       itemsBalance={itemsBalance}
+    //     />
+    //   );
+    // }
 
     if (activeTab === 1) {
       return (
