@@ -3,25 +3,24 @@ import React, { useState } from 'react';
 import { EditChatModal } from '@components/Profile';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { observer } from 'mobx-react-lite';
+import FastImage from 'react-native-fast-image';
 
 // Icon
 import { CheckCircle } from '@assets/icons';
 
-const images = [
-  require("../../../../assets/icons/example/back-1.png"),
-  require("../../../../assets/icons/example/back-2.png"),
-  require("../../../../assets/icons/example/back-3.png"),
-  require("../../../../assets/icons/example/back-4.png"),
-  require("../../../../assets/icons/example/back-5.png"),
-  require("../../../../assets/icons/example/back-6.png"),
-];
+// Store
+import { useStores } from '@stores/context';
 
-export const ProfileWallpaper = () => {
+export const ProfileWallpaper = observer(() => {
+  const { chatStore } = useStores();
+  
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const handleImagePress = (index: number) => {
     setSelectedImageIndex(index);
+    chatStore.changeBackgroundTheme(index);
   };
 
   const handlePhotoPress = () => {
@@ -54,13 +53,14 @@ export const ProfileWallpaper = () => {
         </Box>
       </TouchableOpacity>
 
+
       <FlatList
-        data={images}
+        data={chatStore.backgroundTheme}
         numColumns={3}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <TouchableOpacity style={styles.imageContainer} onPress={() => handleImagePress(index)}>
-            <Image source={item} alt="Gallery Image" style={styles.galleryImage} />
+            <FastImage source={{ uri: item.value, priority: FastImage.priority.normal }} style={styles.galleryImage} />
             {selectedImageIndex === index && (
               <View style={styles.checkmarkContainer}>
                 <CheckCircle />
@@ -78,7 +78,7 @@ export const ProfileWallpaper = () => {
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   shadowContainer: {
@@ -102,12 +102,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   imageContainer: {
-    flex: 1,
     margin: 5,
     borderRadius: 10,
     overflow: 'hidden',
   },
   galleryImage: {
+    width: wp("25% "),
+    height: hp("21.7%"),
     borderRadius: 10,
     position: "relative",
   },

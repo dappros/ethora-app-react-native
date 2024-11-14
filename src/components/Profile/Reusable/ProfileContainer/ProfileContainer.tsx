@@ -1,13 +1,15 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useState } from "react";
 import { Animated, View, TouchableOpacity } from "react-native";
 import { GestureHandlerRootView, PanGestureHandler, PanGestureHandlerGestureEvent, State } from "react-native-gesture-handler";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { NativeBaseProvider } from "native-base";
+import { useNavigation } from "@react-navigation/native";
 
 // Components
 import {
   ProfileHeaderGroupButtons,
 } from "@components/Profile";
+import { QRModal } from "@components/Modals/QR/QRModal";
 
 // Import Icons
 import { Arrow, QRCode } from "@assets/icons";
@@ -18,12 +20,14 @@ import { styles } from "./ProfileContainerStyle";
 
 // Types
 import { ProfileButtonType } from "@constants/ProfileButtons";
+import { HomeStackNavigationProp } from "@/src/navigation/types";
 
 // Buttons
 
 interface ProfileContainerType {
   panY: Animated.Value;
-  background: string;
+  background?: string;
+  chatJid: string;
   children: ReactNode;
   chatButtons: ProfileButtonType[];
   headerHeight: Animated.AnimatedInterpolation<string | number>;
@@ -37,13 +41,19 @@ export const ProfileContainer: FC<ProfileContainerType> = (props) => {
   const {
     panY,
     chatButtons,
+    chatJid,
     headerHeight,
     imageOpacity,
+    background,
     onGestureEvent,
     onHandlerStateChange,
     componentProp: ComponentProp,
     children
   } = props;
+
+  const [isShowQrModal, setIsShowQrModal] = useState<boolean>(false);
+
+  const navigation = useNavigation<HomeStackNavigationProp>();
   
   return (
     <NativeBaseProvider>
@@ -56,8 +66,8 @@ export const ProfileContainer: FC<ProfileContainerType> = (props) => {
             <Animated.View style={{ flex: 1 }}>
               <Animated.View style={[styles.header, { height: headerHeight }]}>
                 <View style={styles.headerButtons}>
-                  <TouchableOpacity><Arrow height={hp("4%")}/></TouchableOpacity>
-                  <TouchableOpacity><QRCode height={hp("4%")}/></TouchableOpacity>
+                  <TouchableOpacity onPress={() => navigation.goBack()}><Arrow height={hp("4%")}/></TouchableOpacity>
+                  <TouchableOpacity onPress={() => setIsShowQrModal(true)}><QRCode height={hp("4%")}/></TouchableOpacity>
                 </View>
                 <View style={{position: "relative"}}>
                   {ComponentProp}
@@ -66,7 +76,7 @@ export const ProfileContainer: FC<ProfileContainerType> = (props) => {
               </Animated.View>
 
               <Animated.Image
-                source={require("../../../../assets/temporary/example.webp")}
+                source={{uri: background}}
                 style={[styles.headerImage, { opacity: imageOpacity }]}
                 resizeMode="cover"
               />
@@ -75,6 +85,13 @@ export const ProfileContainer: FC<ProfileContainerType> = (props) => {
             </Animated.View>
           </PanGestureHandler>
         </GestureHandlerRootView>
+
+        <QRModal
+          open={isShowQrModal}
+          onClose={() => setIsShowQrModal(false)}
+          title={"Chatroom"}
+          link={chatJid}
+        />
       </View>
     </NativeBaseProvider>
   );

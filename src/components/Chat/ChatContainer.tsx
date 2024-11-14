@@ -1281,7 +1281,11 @@ const ChatContainer = observer((props: ChatContainerProps) => {
             roomJID={roomDetails.jid}
             title={chatStore.roomsInfoMap[roomDetails.jid]?.name}
             isQR={true}
-            onQRPressed={() => navigation.navigate("ChatProfileScreen")}
+            //@ts-ignore
+            onQRPressed={() => navigation.navigate("ChatProfileScreen", {
+              chatJid: roomDetails.jid,
+              chatName: chatStore.roomsInfoMap[roomDetails.jid]?.name
+            })}
             isChatRoomDetail={true}
           />
         ) : (

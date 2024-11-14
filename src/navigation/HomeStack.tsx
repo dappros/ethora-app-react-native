@@ -239,6 +239,7 @@ export const HomeStackScreen = observer(() => {
         name={'ChatProfileScreen'}
         component={ChatProfileScreen}
         options={() => ({
+          headerShown: false,
           header: ({}) => <></>,
         })}
       />

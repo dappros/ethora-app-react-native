@@ -132,7 +132,7 @@ export const ProfileEditChat: FC<ProfileEditChatProps> = (props) => {
                       <Text fontSize="md">Set a Wallpaper</Text>
                     </HStack>
                     {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
-                    <Icon name="arrow" size={9} color="gray.400" />
+                    <Icon name="arrow-right" size={9} color="gray.400" />
                       </HStack>
                 </TouchableOpacity>
     
@@ -142,11 +142,11 @@ export const ProfileEditChat: FC<ProfileEditChatProps> = (props) => {
                 <HStack alignItems="center" justifyContent="space-between">
                   <HStack space={2} alignItems="center">
                     {/* <Icon as={<Ionicons name="musical-notes" />} size="md" color="blue.600" /> */}
-                    <Icon name="musical" size={9} color="blue.600" />
+                    <Icon name="music" size={9} color="blue.600" />
                     <Text fontSize="md">Set a Soundtrack</Text>
                   </HStack>
                   {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
-                  <Icon name="arrow" size={9} color="gray.400" />
+                  <Icon name="arrow-right" size={9} color="gray.400" />
 
                 </HStack>
 
@@ -159,7 +159,7 @@ export const ProfileEditChat: FC<ProfileEditChatProps> = (props) => {
                     <Text fontSize="md">Set a Chat Bot</Text>
                   </HStack>
                   {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
-                  <Icon name="arrow" size={9} color="gray.400" />
+                  <Icon name="arrow-right" size={9} color="gray.400" />
                   </HStack>
               </VStack>
 

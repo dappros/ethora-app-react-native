@@ -20,13 +20,23 @@ import { styles } from "./GroupHeaderContainerStyle";
 import { OptionsSettingProfile } from '@constants/OptionsSettingProfile';
 
 interface GroupHeaderContainerProps {
+  name?: string;
+  avatar?: string;
+  members?: number;
   panY: Animated.Value;
   isEndReached: boolean;
   handleOpenEditModal?: () => void;
 }
 
 export const GroupHeaderContainer: FC<GroupHeaderContainerProps> = (props) => {
-  const { panY, isEndReached, handleOpenEditModal } = props;
+  const {
+    name,
+    members,
+    panY,
+    isEndReached,
+    avatar,
+    handleOpenEditModal,
+  } = props;
   const { avatarOpacity, avatarTranslateX, containerTranslateY } = useGroupHeaderAnimations(panY);
 
   const [isFavorite, setIsFavorite] = useState(false);
@@ -86,8 +96,10 @@ export const GroupHeaderContainer: FC<GroupHeaderContainerProps> = (props) => {
             },
           ]} />
         <Animated.View style={[{ transform: [{ translateX: avatarTranslateX }], justifyContent: "center" }]}>
-          <Text style={styles.userName}>Group name</Text>
-          <Text style={styles.members}>3 members</Text>
+          <Text style={styles.userName}>{name ? name : "Chat name"}</Text>
+          <Text style={styles.members}>
+            {members} {members && members > 1  ? "members" : "member"}
+          </Text>
         </Animated.View>
       </View>
       {isEndReached

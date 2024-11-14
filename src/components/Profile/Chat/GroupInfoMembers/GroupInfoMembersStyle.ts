@@ -10,21 +10,21 @@ export const styles = StyleSheet.create({
     backgroundColor: '#E8EDF2',
     height: hp("100%"),
     paddingHorizontal: 30,
-    zIndex: 101
+    zIndex: 101,
+    paddingTop: 25
   },
   descriptionContainer: {
     backgroundColor: '#FFFFFF',
     fontSize: 14,
     padding: 15,
     borderRadius: 15,
-    marginVertical: 25,
+    marginBottom: 25,
   },
   descriptionTitle: {
     color: '#8F8F8F',
   },
   descriptionText: {},
   tabsContainer: {
-    height: hp("57%"),
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     padding: 15,
@@ -55,6 +55,5 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   userListContent: {
-    minHeight: hp('30%'),
   },
 });

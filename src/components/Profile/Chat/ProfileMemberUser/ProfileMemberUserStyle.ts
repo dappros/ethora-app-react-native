@@ -6,7 +6,17 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 5,
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8EDF2',
+  },
+  nonAvatar: {
+    borderColor: "#8F8F8F",
+    borderWidth: 1,
+    borderRadius: hp("4.5%"),
+    width: 50,
+    height: 50,
+    backgroundColor: "#0052CD",
   },
   userDetails: {
     flexDirection: 'row',

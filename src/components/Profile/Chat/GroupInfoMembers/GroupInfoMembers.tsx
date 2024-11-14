@@ -23,7 +23,7 @@ import { ExampleData } from '@constants/profileTab';
 interface GroupInfoMembersProps {
   panY: Animated.Value;
   description: string;
-  members: number;
+  members?: number;
   users: ExampleData[];
 }
 
@@ -56,10 +56,10 @@ export const GroupInfoMembers: FC<GroupInfoMembersProps> = (props) => {
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY: tabsTranslateY }] }]}>
-      <View style={styles.descriptionContainer}>
+      {description && <View style={styles.descriptionContainer}>
         <Text style={styles.descriptionTitle}>Description</Text>
         <Text style={styles.descriptionText}>{description}</Text>
-      </View>
+      </View>}
 
       <View style={styles.tabsContainer}>
         {showAddMembers && (
@@ -69,7 +69,9 @@ export const GroupInfoMembers: FC<GroupInfoMembersProps> = (props) => {
           </View>
         )}
         <View style={styles.memberContainer}>
-          <Text style={styles.memberContainerText}>Members: {members}</Text>
+          <Text style={styles.memberContainerText}>
+            {members && members > 1  ? "Members" : "Member"}: {members}
+          </Text>
           <TouchableOpacity style={styles.arrowButton} onPress={handleArrowPress}>
             <ArrowRight />
           </TouchableOpacity>
@@ -78,7 +80,7 @@ export const GroupInfoMembers: FC<GroupInfoMembersProps> = (props) => {
         <FlatList
           data={users}
           renderItem={({ item }) => <ProfileMemberUser item={item} onPress={() => handleUserPress(item)} />}
-          keyExtractor={(item: ExampleData) => item.id}
+          keyExtractor={(item: ExampleData) => item._id}
           showsVerticalScrollIndicator={true}
           contentContainerStyle={styles.userListContent}
           style={{ flexGrow: 1,paddingBottom: 10 }}

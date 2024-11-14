@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { StyleSheet } from "react-native";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import React, { useMemo, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { useStores } from "@stores/context";
 
 // Components
 import { GroupHeaderContainer, GroupInfoMembers, ProfileContainer, ProfileEditChat } from "@components/Profile";
@@ -11,11 +11,11 @@ import { useProfileAnimation } from "@hooks/profile";
 // Buttons
 import { chatButtons } from "@constants/ProfileButtons";
 
-// Data
-import { data } from "@constants/profileTab";
 
-
-const ChatProfileScreen = () => {
+const ChatProfileScreen = observer(({route}: any) => {
+  const { chatStore, loginStore } = useStores();
+  const { chatJid } = route.params;
+ 
   const {
     panY,
     isEndReached,
@@ -26,6 +26,26 @@ const ChatProfileScreen = () => {
   } = useProfileAnimation();
   
   const [isEditVisible, setIsEditVisible] = useState(false);
+  const [description, setdescription] = useState("");
+  const [chatInformation, setChatInformation] = useState(chatStore.roomsInfoMap[chatJid]);
+
+  const room = chatStore.roomList.find((item) => item.jid === chatJid);
+
+  const users = useMemo(() => {
+    const messagesRoom = chatStore.messages.filter((item) => (
+      item.roomJid === chatJid)).map((chat) => chat.user);
+
+    return messagesRoom.filter((item, index, self) =>
+      index === self.findIndex((t) => t._id === item._id)
+    );
+  }, [chatStore.messages]);
+
+
+  const snapshot = JSON.parse(JSON.stringify(users));
+  console.log("chatInformation--", chatInformation);
+  console.log("snapshot: ", snapshot);
+  console.log("chatStore--", chatStore);
+  console.log("loginStore--", loginStore);
 
   const handleCloseEdit = () => {
     setIsEditVisible(false);
@@ -39,22 +59,30 @@ const ChatProfileScreen = () => {
     <ProfileContainer
       panY={panY}
       chatButtons={chatButtons}
+      chatJid={chatJid}
       headerHeight={headerHeight}
       imageOpacity={imageOpacity}
       onGestureEvent={onGestureEvent}
       onHandlerStateChange={onHandlerStateChange}
-      background="../../assets/images/example.webp"
-      componentProp={<GroupHeaderContainer handleOpenEditModal={handleOpenEditModal} panY={panY} isEndReached={isEndReached} />}
+      background={room?.avatar}
+      componentProp={
+        <GroupHeaderContainer
+          avatar={room?.avatar}
+          name={room?.name}
+          members={room?.participants}
+          handleOpenEditModal={handleOpenEditModal}
+          panY={panY} isEndReached={isEndReached}
+        />}
     >
       <GroupInfoMembers
         panY={panY}
-        description="TextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextTextText"
-        members={3}
-        users={data}
+        description={chatInformation.roomDescription}
+        members={room?.participants}
+        users={users}
       />
       <ProfileEditChat isEditVisible={isEditVisible} handleCloseEdit={handleCloseEdit} />
     </ProfileContainer>
   );
-};
+});
 
 export default ChatProfileScreen;
