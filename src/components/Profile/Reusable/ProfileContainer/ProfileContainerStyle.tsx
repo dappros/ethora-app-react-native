@@ -34,6 +34,6 @@ export const styles = StyleSheet.create({
     top: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#000000"
+    backgroundColor: "#8F8F8F"
   },
 })

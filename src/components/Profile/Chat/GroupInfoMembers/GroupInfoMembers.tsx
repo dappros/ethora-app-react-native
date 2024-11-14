@@ -22,7 +22,7 @@ import { ExampleData } from '@constants/profileTab';
 
 interface GroupInfoMembersProps {
   panY: Animated.Value;
-  description: string;
+  description?: string;
   members?: number;
   users: ExampleData[];
 }

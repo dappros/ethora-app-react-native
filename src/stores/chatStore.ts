@@ -89,6 +89,7 @@ export interface roomListProps {
   priority?: number;
   muted?: boolean;
   isFavourite?: boolean;
+  description?: string;
   roomThumbnail?: string;
   roomBackground?: string;
   roomBackgroundIndex?: number;

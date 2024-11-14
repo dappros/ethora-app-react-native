@@ -10,6 +10,7 @@
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@constants/*": ["./src/constants/*"],
+      "@xmpp/*": ["./src/xmpp/*"],
     }
   },
   "files": ["src/declarations.d.ts"],

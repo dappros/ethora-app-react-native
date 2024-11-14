@@ -50,11 +50,10 @@ export const ProfileContainer: FC<ProfileContainerType> = (props) => {
     componentProp: ComponentProp,
     children
   } = props;
+  const navigation = useNavigation<HomeStackNavigationProp>();
 
   const [isShowQrModal, setIsShowQrModal] = useState<boolean>(false);
 
-  const navigation = useNavigation<HomeStackNavigationProp>();
-  
   return (
     <NativeBaseProvider>
       <View style={{height: "100%"}}>
@@ -76,7 +75,7 @@ export const ProfileContainer: FC<ProfileContainerType> = (props) => {
               </Animated.View>
 
               <Animated.Image
-                source={{uri: background}}
+                source={{ uri: background }}
                 style={[styles.headerImage, { opacity: imageOpacity }]}
                 resizeMode="cover"
               />

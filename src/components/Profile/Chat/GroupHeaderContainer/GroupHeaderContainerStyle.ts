@@ -19,7 +19,18 @@ export const styles = StyleSheet.create({
     aspectRatio: "1/1",
     borderRadius: 50,
     marginRight: 10,
+    backgroundColor: "#8F8F8F"
     
+  },
+  nonAvatar: {
+    borderColor: "#8F8F8F",
+    borderWidth: 1,
+    borderRadius: hp("4.5%"),
+    width: wp("18%"),
+    aspectRatio: "1/1",
+    backgroundColor: "#0052CD",
+    alignItems: "center",
+    justifyContent: "center",
   },
   userName: {
     fontSize: wp("5%"),

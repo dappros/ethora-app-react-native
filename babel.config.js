@@ -12,6 +12,7 @@ module.exports = {
           "@components": "./src/components",
           "@hooks": "./src/hooks",
           "@constants": "./src/constants",
+          "@xmpp": "./src/xmpp",
         },
       },
     ],

@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import { VStack, HStack, Box, Text, Input, Switch, Button, Center, Divider, NativeBaseProvider, Image } from 'native-base';
 // import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import Icon from "react-native-vector-icons/FontAwesome";
-import { Keyboard, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Modal from 'react-native-modal';
 
@@ -13,17 +13,21 @@ import { EditChatModal, ProfileModalBackground } from '@components/Profile';
 import { Photo } from "@assets/icons";
 
 interface ProfileEditChatProps {
+  avatar?: string;
   isEditVisible: boolean;
+  chatName?: string;
   handleCloseEdit: () => void;
+  setChangeChat:() => void;
 }
 
 
 export const ProfileEditChat: FC<ProfileEditChatProps> = (props) => {
-  const { isEditVisible, handleCloseEdit } = props;
+  const { avatar, isEditVisible, handleCloseEdit, setChangeChat, chatName } = props;
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isModalChangeBackground, setIsModalChangeBackground] = useState<boolean>(false);
-  const [avatarChat, setAvatarChat] = useState<string>("");
+  const [avatarChat, setAvatarChat] = useState<string | undefined>(avatar);
+  const [textDescription, setTextDescription] = useState<string | undefined>("hello");
   
   const handlePhotoPress = () => {
     setIsModalVisible(true);
@@ -46,165 +50,172 @@ export const ProfileEditChat: FC<ProfileEditChatProps> = (props) => {
     setIsModalChangeBackground(false);
   };
 
+  const onChangeDescription = (event: NativeSyntheticEvent<TextInputChangeEventData>) => {
+    setTextDescription(event.nativeEvent.text);
+    console.log("event", event.nativeEvent.text)
+  }
+
   return (
-    <NativeBaseProvider>
-      <Modal
-        isVisible={isEditVisible}
-        swipeDirection={undefined}
-        onSwipeComplete={undefined}
-        backdropOpacity={0.7}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
-        style={{padding: 0, margin: 0}}
-        statusBarTranslucent={true}
-      >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} style={{flex: 1}}>
-          <Center flex={1} bg="#e9eff6">
-            <Box
-              bg="white"
-              w="83%"
-              h="80%"
-              p={hp("2%")}
-              borderRadius="2xl"
-              shadow={2}
-              style={{flexDirection: "column", justifyContent: "space-between"}}
-            >
-              <Text fontSize="md" fontWeight="bold" textAlign="center">
-                Edit
+    <Modal
+    isVisible={isEditVisible}
+    swipeDirection={undefined}
+    onSwipeComplete={undefined}
+    backdropOpacity={0.7}
+    animationIn="slideInUp"
+    animationOut="slideOutDown"
+    style={{padding: 0, margin: 0}}
+    statusBarTranslucent={true}
+    avoidKeyboard={false}
+  >
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} style={{flex: 1}}>
+      <Center flex={1} bg="#e9eff6" style={{height: "100%"}}>
+        <Box
+          bg="white"
+          w="83%"
+          p={hp("2%")}
+          borderRadius="2xl"
+          shadow={2}
+          style={{height: hp("80%"),flexDirection: "column", justifyContent: "space-between"}}
+        >
+          <Text fontSize="md" fontWeight="bold" textAlign="center">
+            Edit
+          </Text>
+
+          <TouchableOpacity onPress={handlePhotoPress}>
+            <Center> 
+              {avatarChat
+                ? <Image size={hp("8%")} borderRadius="full" source={{ uri: avatarChat }} alt="Avatar"/> 
+                : <Box bg="blue.600" size={hp("8%")} borderRadius="full" justifyContent="center" alignItems="center">
+                    {/* <Icon as={<Ionicons name="camera" />} size="lg" color="white" /> */}
+                    <Icon name="camera" size={20} color="#fff" />
+                  </Box>
+              }
+              <Text fontSize="md" mt={hp("1.1%")} color="#000000">
+                Set a new photo
               </Text>
+            </Center>
+          </TouchableOpacity>
 
-              <TouchableOpacity onPress={handlePhotoPress}>
-                <Center> 
-                  {avatarChat
-                    ? <Image size={hp("8%")} borderRadius="full" source={{ uri: avatarChat }} alt="Avatar"/> 
-                    : <Box bg="blue.600" size={hp("8%")} borderRadius="full" justifyContent="center" alignItems="center">
-                        {/* <Icon as={<Ionicons name="camera" />} size="lg" color="white" /> */}
-                        <Icon name="camera" size={9} color="#fff" />
-                      </Box>
-                  }
-                  <Text fontSize="md" mt={hp("1.1%")} color="#000000">
-                    Set a new photo
-                  </Text>
-                </Center>
-              </TouchableOpacity>
+          <VStack space={hp("2.5%")}>
+            <Input
+              value={chatName}
+              placeholder="Chat name"
+              placeholderTextColor="#8F8F8F"
+              variant="Filled"
+              bg="#F5F7F9"
+              borderRadius="lg"
+              fontSize="md"
+              height={hp("5%")}
+              _focus={{ borderColor: 'blue.500' }}
+            />
+            <Input
+              value={textDescription}
+              onChange={onChangeDescription}
+              placeholder="Description (optional)"
+              placeholderTextColor="#8F8F8F"
+              variant="Filled"
+              bg="#F5F7F9"
+              borderRadius="lg"
+              fontSize="md"
+              _focus={{ borderColor: 'blue.500' }}
+              height={hp("9%")}
+              multiline
+            />
 
-              <VStack space={hp("2.5%")}>
-                <Input
-                  placeholder="Chat name"
-                  placeholderTextColor="#8F8F8F"
-                  variant="Filled"
-                  bg="#F5F7F9"
-                  borderRadius="lg"
-                  fontSize="md"
-                  height={hp("5%")}
-                  _focus={{ borderColor: 'blue.500' }}
-                />
-                <Input
-                  placeholder="Description (optional)"
-                  placeholderTextColor="#8F8F8F"
-                  variant="Filled"
-                  bg="#F5F7F9"
-                  borderRadius="lg"
-                  fontSize="md"
-                  _focus={{ borderColor: 'blue.500' }}
-                  height={hp("9%")}
-                  multiline
-                />
+            <HStack alignItems="center" justifyContent="space-between">
+              <Text color="gray.500" fontSize="xs">
+                Make chat private{'\n'}
+                (requires an invitation to join)
+              </Text>
+              <Switch size="md" offTrackColor="#F5F7F9"/>
+            </HStack>
+          </VStack>
 
-                <HStack alignItems="center" justifyContent="space-between">
-                  <Text color="gray.500" fontSize="xs">
-                    Make chat private{'\n'}
-                    (requires an invitation to join)
-                  </Text>
-                  <Switch size="md" offTrackColor="#F5F7F9"/>
+          <Divider />
+
+
+          <VStack space={4}>
+            <TouchableOpacity onPress={openChangeBackground}>
+              <HStack alignItems="center" justifyContent="space-between">
+                <HStack space={2} alignItems="center">
+                  {/* <Icon as={<FontAwesome name="image" />} size="md" color="blue.600" /> */}
+                  <Icon name="image" size={14} color="blue.600" />
+                  <Text fontSize="md">Set a Wallpaper</Text>
                 </HStack>
-              </VStack>
-
-              <Divider />
-
-   
-              <VStack space={4}>
-                <TouchableOpacity onPress={openChangeBackground}>
-                  <HStack alignItems="center" justifyContent="space-between">
-                    <HStack space={2} alignItems="center">
-                      {/* <Icon as={<FontAwesome name="image" />} size="md" color="blue.600" /> */}
-                      <Icon name="image" size={9} color="blue.600" />
-                      <Text fontSize="md">Set a Wallpaper</Text>
-                    </HStack>
-                    {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
-                    <Icon name="arrow-right" size={9} color="gray.400" />
-                      </HStack>
-                </TouchableOpacity>
-    
-
-                <Divider />
-                
-                <HStack alignItems="center" justifyContent="space-between">
-                  <HStack space={2} alignItems="center">
-                    {/* <Icon as={<Ionicons name="musical-notes" />} size="md" color="blue.600" /> */}
-                    <Icon name="music" size={9} color="blue.600" />
-                    <Text fontSize="md">Set a Soundtrack</Text>
+                {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
+                <Icon name="arrow-right" size={9} color="gray.400" />
                   </HStack>
-                  {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
-                  <Icon name="arrow-right" size={9} color="gray.400" />
+            </TouchableOpacity>
 
-                </HStack>
 
-                <Divider />
-                
-                <HStack alignItems="center" justifyContent="space-between">
-                  <HStack space={2} alignItems="center">
-                    {/* <Icon as={<Ionicons name="chatbox-ellipses" />} size="md" color="blue.600" /> */}
-                    <Icon name="message" size={9} color="blue.600" />
-                    <Text fontSize="md">Set a Chat Bot</Text>
-                  </HStack>
-                  {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
-                  <Icon name="arrow-right" size={9} color="gray.400" />
-                  </HStack>
-              </VStack>
-
-              <HStack space={5} justifyContent="center">
-                <TouchableOpacity
-                  style={{
-                    borderRadius: 20,
-                    backgroundColor: "#CDCDCD",
-                    paddingHorizontal: hp("2%"),
-                    paddingVertical: hp("1%")
-                  }}
-                  onPress={handleCloseEdit}
-                >
-                  <Text fontSize="md" color="white">
-                    Cancel
-                  </Text>
-                  </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    borderRadius: 20,
-                    backgroundColor: "#0052CD",
-                    paddingHorizontal: hp("2%"),
-                    paddingVertical: hp("1%")
-                  }}
-                >
-                  <Text fontSize="md" color="white">
-                    Set changes
-                  </Text>
-                </TouchableOpacity>
+            <Divider />
+            
+            <HStack alignItems="center" justifyContent="space-between">
+              <HStack space={2} alignItems="center">
+                {/* <Icon as={<Ionicons name="musical-notes" />} size="md" color="blue.600" /> */}
+                <Icon name="music" size={14} color="blue.600" />
+                <Text fontSize="md">Set a Soundtrack</Text>
               </HStack>
-            </Box>
-          </Center>
-        </TouchableWithoutFeedback>
+              {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
+              <Icon name="arrow-right" size={9} color="gray.400" />
 
-        <EditChatModal
-          isModalVisible={isModalVisible}
-          handleCloseModal={handleCloseModal}
-          changeImage={changeAvatarChat}
-        />
+            </HStack>
 
-        <ProfileModalBackground
-          closeChangeBackground={closeChangeBackground}
-          isModalChangeBackground={isModalChangeBackground}
-        />
-      </Modal>
-    </NativeBaseProvider>
+            <Divider />
+            
+            <HStack alignItems="center" justifyContent="space-between">
+              <HStack space={2} alignItems="center">
+                {/* <Icon as={<Ionicons name="chatbox-ellipses" />} size="md" color="blue.600" /> */}
+                <Icon name="message" size={14} color="blue.600" />
+                <Text fontSize="md">Set a Chat Bot</Text>
+              </HStack>
+              {/* <Icon as={<MaterialIcons name="arrow-forward-ios" />} size="xs" color="gray.400" /> */}
+              <Icon name="arrow-right" size={9} color="gray.400" />
+              </HStack>
+          </VStack>
+
+          <HStack space={5} justifyContent="center">
+            <TouchableOpacity
+              style={{
+                borderRadius: 20,
+                backgroundColor: "#CDCDCD",
+                paddingHorizontal: hp("2%"),
+                paddingVertical: hp("1%")
+              }}
+              onPress={handleCloseEdit}
+            >
+              <Text fontSize="md" color="white">
+                Cancel
+              </Text>
+              </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                borderRadius: 20,
+                backgroundColor: "#0052CD",
+                paddingHorizontal: hp("2%"),
+                paddingVertical: hp("1%")
+              }}
+              onPress={setChangeChat}
+            >
+              <Text fontSize="md" color="white">
+                Set changes
+              </Text>
+            </TouchableOpacity>
+          </HStack>
+        </Box>
+      </Center>
+    </TouchableWithoutFeedback>
+
+    <EditChatModal
+      isModalVisible={isModalVisible}
+      handleCloseModal={handleCloseModal}
+      changeImage={changeAvatarChat}
+    />
+
+    <ProfileModalBackground
+      closeChangeBackground={closeChangeBackground}
+      isModalChangeBackground={isModalChangeBackground}
+    />
+  </Modal>
   );
 };

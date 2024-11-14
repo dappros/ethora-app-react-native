@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStores } from "@stores/context";
 
@@ -10,6 +10,9 @@ import { useProfileAnimation } from "@hooks/profile";
 
 // Buttons
 import { chatButtons } from "@constants/ProfileButtons";
+
+
+import { changeRoomDescription, getRoomMemberInfo, roomConfig, roomConfigurationForm } from "../../xmpp/stanzas";
 
 
 const ChatProfileScreen = observer(({route}: any) => {
@@ -24,12 +27,17 @@ const ChatProfileScreen = observer(({route}: any) => {
     onGestureEvent,
     onHandlerStateChange,
   } = useProfileAnimation();
+
+  const room = chatStore.getRoomDetails(chatJid);
   
   const [isEditVisible, setIsEditVisible] = useState(false);
-  const [description, setdescription] = useState("");
-  const [chatInformation, setChatInformation] = useState(chatStore.roomsInfoMap[chatJid]);
+  const [textDescription, setTextDescription] = useState<string>("description new example hello");
+  const [nameChat, setNameChat] = useState<string>("Y Chat Example");
 
-  const room = chatStore.roomList.find((item) => item.jid === chatJid);
+  const chatInformation = useMemo(() => {
+    return chatStore.roomsInfoMap[chatJid];
+  }, [chatStore.roomsInfoMap[chatJid]])
+
 
   const users = useMemo(() => {
     const messagesRoom = chatStore.messages.filter((item) => (
@@ -44,8 +52,9 @@ const ChatProfileScreen = observer(({route}: any) => {
   const snapshot = JSON.parse(JSON.stringify(users));
   console.log("chatInformation--", chatInformation);
   console.log("snapshot: ", snapshot);
+  console.log("room--", room);
+  console.log("roles--", chatStore.roomRoles[chatJid]);
   console.log("chatStore--", chatStore);
-  console.log("loginStore--", loginStore);
 
   const handleCloseEdit = () => {
     setIsEditVisible(false);
@@ -53,6 +62,21 @@ const ChatProfileScreen = observer(({route}: any) => {
 
   const handleOpenEditModal = () => {
     setIsEditVisible(true);
+  };
+
+  const setChangeChat = () => {
+    roomConfigurationForm(
+      "",
+      room!.jid,
+      {roomName: nameChat},
+      chatStore.xmpp
+    )
+    changeRoomDescription(
+      "",
+      room!.jid,
+      textDescription,
+      chatStore.xmpp
+    );
   };
 
   return (
@@ -64,10 +88,10 @@ const ChatProfileScreen = observer(({route}: any) => {
       imageOpacity={imageOpacity}
       onGestureEvent={onGestureEvent}
       onHandlerStateChange={onHandlerStateChange}
-      background={room?.avatar}
+      background={room?.roomThumbnail}
       componentProp={
         <GroupHeaderContainer
-          avatar={room?.avatar}
+          avatar={room?.roomThumbnail}
           name={room?.name}
           members={room?.participants}
           handleOpenEditModal={handleOpenEditModal}
@@ -76,11 +100,17 @@ const ChatProfileScreen = observer(({route}: any) => {
     >
       <GroupInfoMembers
         panY={panY}
-        description={chatInformation.roomDescription}
+        description={chatInformation?.roomDescription}
         members={room?.participants}
         users={users}
       />
-      <ProfileEditChat isEditVisible={isEditVisible} handleCloseEdit={handleCloseEdit} />
+      <ProfileEditChat
+        avatar={room?.roomThumbnail}
+        isEditVisible={isEditVisible}
+        handleCloseEdit={handleCloseEdit}
+        chatName={room?.name}
+        setChangeChat={setChangeChat}
+      />
     </ProfileContainer>
   );
 });

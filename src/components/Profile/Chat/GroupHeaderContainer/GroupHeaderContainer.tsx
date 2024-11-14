@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Animated, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { Menu, Pressable } from 'native-base';
+import { Box, Menu, Pressable } from 'native-base';
 
 // Components
 import { ListSettings } from '@components/Core/SettingsList';
@@ -15,6 +15,7 @@ import { StarIcon, Favorite, Dots } from "@assets/icons";
 
 // Styles
 import { styles } from "./GroupHeaderContainerStyle";
+import { textStyles } from '../../../../../docs/config';
 
 // Data
 import { OptionsSettingProfile } from '@constants/OptionsSettingProfile';
@@ -86,15 +87,33 @@ export const GroupHeaderContainer: FC<GroupHeaderContainerProps> = (props) => {
   return (
     <Animated.View style={[styles.groupHeaderContainer, { transform: [{ translateY: containerTranslateY }] }]}>
       <View style={styles.userContainer}>
-        <Animated.Image
-          source={require("../../../../assets/temporary/example.webp")}
-          style={[
-            styles.avatar,
-            {
-              opacity: avatarOpacity,
-              transform: [{ translateX: avatarTranslateX }],
-            },
-          ]} />
+        {avatar
+          ? <Animated.Image
+              source={{ uri: avatar }}
+              style={[
+              styles.avatar, {
+                opacity: avatarOpacity,
+                transform: [{ translateX: avatarTranslateX }]},
+                ]}
+            />
+          : <Animated.View
+              style={[styles.nonAvatar, {
+                opacity: avatarOpacity,
+                transform: [{ translateX: avatarTranslateX }]},
+              ]}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontFamily: textStyles.boldFont,
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                }}
+              >
+                {name && name[0] + (name[1] ? name[1] : "")}
+              </Text>
+            </Animated.View>
+        }
         <Animated.View style={[{ transform: [{ translateX: avatarTranslateX }], justifyContent: "center" }]}>
           <Text style={styles.userName}>{name ? name : "Chat name"}</Text>
           <Text style={styles.members}>
