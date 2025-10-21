@@ -20,9 +20,9 @@
     "userInterfaceStyle": "light",
 
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/login_background.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#5B4FE9"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
