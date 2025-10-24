@@ -5,7 +5,13 @@
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": { "@/*": ["./*"] }
+    "paths": { 
+      "@/*": ["./*"],
+      "@modules/*": ["./src/modules/*"],
+      "@core/*": ["./src/core/*"],
+      "@assets/*": ["./assets/*"],
+      "@app/*": ["./app/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]
 }

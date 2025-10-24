@@ -1,8 +1,9 @@
 import { Tabs, Redirect } from 'expo-router';
 import { useAppSelector } from '@/src/store';
+import { useAuth } from '@/src/modules/auth/hooks';
 
 export default function AppLayout() {
-  const token = useAppSelector(s => s.auth.token);
+  const { token } = useAuth();
   if (!token) return <Redirect href="/(auth)/login" />;
   return (
     <Tabs screenOptions={{ headerShown: false }}>

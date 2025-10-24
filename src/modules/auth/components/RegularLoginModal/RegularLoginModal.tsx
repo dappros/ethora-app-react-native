@@ -1,330 +1,233 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
-} from "react-native";
+} from 'react-native';
+import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { Router } from 'expo-router';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withTiming, withSpring, runOnJS,
+} from 'react-native-reanimated';
+import { useForm } from 'react-hook-form';
+import { FormTextField } from '@/src/core/components';
+import { GoogleSignInButton } from '../GoogleSignInButton';
+import { useAuth } from '@modules/auth/hooks';
 
-import {
-  heightPercentageToDP as hp,
-  widthPercentageToDP as wp,
-} from "react-native-responsive-screen";
-import Modal from "react-native-modal";
+type Form = { email: string; password: string };
 
-import { Input, VStack } from "native-base";
-import {
-  textStyles,
-  regularLoginEmail,
-  commonColors,
-} from "../../../docs/config";
-import { showError } from "../../components/Toast/toast";
-import { useStores } from "../../stores/context";
-import { Button } from "../../components/Button";
-import EmailIcon from "../../assets/icons/email.svg";
-import StarIcon from "../../assets/icons/star.svg";
-import ArrowDownIcon from "../../assets/icons/arrowDown.svg";
-import CloseIcon from "../../assets/icons/close.svg";
-import EyeCrossedIcon from "../../assets/icons/eyeCrossed.svg";
-import EyeOpenIcon from "../../assets/icons/eyeOpen.svg";
-import SocialButtons from "../../components/Login/SocialButtons";
-import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AuthStackParamList } from "../../navigation/types";
-import { authStackRoutes } from "../../navigation/routes";
-import { ParamListBase, RouteProp } from "@react-navigation/native";
-
-interface ExtendedScreenProps {
+interface RegularLoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  navigation: NativeStackNavigationProp<AuthStackParamList, "LoginScreen", undefined>
-  route: RouteProp<ParamListBase>;
+  navigation: Router;
 }
 
-export const RegularLoginModal: FC<ExtendedScreenProps> = ({
-  isOpen,
-  onClose,
-  navigation,
-}) => {
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [userNameFocused, setUserNameFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setisLoading] = useState(false);
-  const { loginStore } = useStores();
-  const [resetModalOpen, setResetModalOpen] = useState(false);
+const H = Dimensions.get('window').height;
+const DURATION = 280;
 
-  const onSubmit = async () => {
-    if (!userName || !password) {
-      return;
+export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose, navigation }) => {
+  const { login, status } = useAuth();
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid, isSubmitting },
+    setError,
+    clearErrors,
+  } = useForm<Form>({
+    defaultValues: { email: '', password: '' },
+    mode: 'onChange',
+  });
+
+  const [visible, setVisible] = useState(isOpen);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const translateY = useSharedValue(H);
+  const progress = useSharedValue(0);
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(progress.value, { duration: DURATION }),
+  }));
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const openAnim = () => {
+    translateY.value = withTiming(0, { duration: DURATION });
+    progress.value = 1;
+  };
+  const closeAnim = (cb?: () => void) => {
+    translateY.value = withTiming(H, { duration: DURATION }, () => cb && runOnJS(cb)());
+    progress.value = 0;
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setVisible(true);
+      requestAnimationFrame(openAnim);
+    } else if (visible) {
+      closeAnim(() => setVisible(false));
     }
-    setisLoading(true);
-    try {
-      await loginStore.regularLogin({ username: userName, password });
-    } catch (error: any) {
-      console.log(error.response.data);
-      if (error?.response?.status === 409) {
-        showError("Error", "This email is not verified");
-      } else {
-        showError("Error", "Something went wrong");
+  }, [isOpen]);
+
+  const handleClose = () => closeAnim(() => { setVisible(false); onClose(); });
+
+  const startY = useSharedValue(0);
+  const pan = Gesture.Pan()
+    .onStart(() => { startY.value = translateY.value; })
+    .onUpdate((e) => {
+      const next = Math.max(0, startY.value + e.translationY);
+      translateY.value = next;
+      const p = 1 - Math.min(1, next / (H * 0.65));
+      progress.value = p;
+    })
+    .onEnd((e) => {
+      const shouldClose = e.velocityY > 900 || translateY.value > H * 0.25;
+      if (shouldClose) closeAnim(() => runOnJS(onClose)());
+      else {
+        translateY.value = withSpring(0, { damping: 18, stiffness: 220 });
+        progress.value = withTiming(1, { duration: 150 });
       }
+    });
+
+  const onSubmit = async ({ email, password }: Form) => {
+    if (email && password) {
+      login({ email, password })
+        .then(() => {
+          clearErrors();
+          navigation.push("(app)");
+        })
+        .catch(() => {
+          setError('email', { type: 'server', message: "Email or password doesn't match!" });
+          setError('password', { type: 'server', message: ' ' });
+        });
     }
-    setisLoading(false);
+
+
+    try {
+      clearErrors();
+      console.log('email', email);
+      console.log('password', password);
+
+      throw new Error('invalid_credentials');
+    } catch (e) {
+      setError('email', { type: 'server', message: "Email or password doesn't match!" });
+      setError('password', { type: 'server', message: ' ' });
+    }
   };
 
   return (
-    <>
-      <Modal
-        onBackdropPress={onClose}
-        animationIn={"slideInUp"}
-        animationOut={"slideOutDown"}
-        isVisible={isOpen}
-        style={{ width: wp("100%") }}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={handleClose}
+      presentationStyle="overFullScreen"
+    >
+      <TouchableWithoutFeedback onPress={handleClose}>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]} />
+      </TouchableWithoutFeedback>
+
+      <KeyboardAvoidingView
+        behavior={Platform.select({ ios: 'padding', android: undefined })}
+        style={{ flex: 1, justifyContent: 'flex-end' }}
       >
-        <View
-          style={{
-            position: "absolute",
-            bottom: -20,
-            left: -20,
-            width: wp("100%"),
-            backgroundColor: "#fff",
-            shadowColor: "#000",
-            shadowOpacity: 0.5,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 2 },
-            elevation: 30,
-            borderTopLeftRadius: 80,
-            borderTopRightRadius: 80,
-            paddingTop: 40,
-            paddingLeft: 45,
-            paddingRight: 45,
-            height: "65%",
-          }}
-        >
-          <View
-            style={{
-              position: "absolute",
-              top: -80,
-              left: "48%",
-              justifyContent: "center",
-              alignItems: "center",
-              // transform: "translateX(-50%)",
-            }}
-          >
-            <TouchableOpacity
-              style={{ alignItems: "center" }}
-              onPress={onClose}
-            >
-              <ArrowDownIcon />
-              <Text
-                style={{
-                  marginTop: 17,
-                  color: "#E8EDF2",
-                  fontFamily: textStyles.regularFont,
-                }}
-              >
-                Back to Sign in
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <VStack justifyContent={"center"}>
-            <View>
-              <Text
-                style={{
-                  color: "#0052CD",
-                  fontFamily: textStyles.regularFont,
-                  fontSize: hp("4.5%"),
-                  marginBottom: 24,
-                }}
-              >
-                Hello again!
-              </Text>
-              <Input
-                testID="loginUsername"
-                accessibilityLabel="Enter your username"
-                maxLength={30}
-                marginBottom={4}
-                fontFamily={textStyles.regularFont}
-                fontSize={hp("1.6%")}
-                color={"black"}
-                value={userName}
-                borderWidth={userNameFocused ? 2 : 2}
-                borderColor={"transparent"}
-                focusOutlineColor={userNameFocused ? "#0052CD" : "transparent"}
-                backgroundColor={userNameFocused ? "#fff" : "#E8EDF2"}
-                borderRadius={15}
-                // paddingLeft={10}
-                onChangeText={setUserName}
-                placeholder={
-                  regularLoginEmail ? "Email" : "Enter your username"
-                }
-                onFocus={() => setUserNameFocused(true)}
-                onBlur={() => setUserNameFocused(false)}
-                placeholderTextColor={"#8F8F8F"}
-                leftElement={
-                  <View style={{ marginLeft: 12 }}>
-                    <EmailIcon />
-                  </View>
-                }
-                rightElement={
-                  userName ? (
-                    <TouchableOpacity
-                      onPress={() => setUserName("")}
-                      style={{
-                        backgroundColor: "#0052CD",
-                        borderRadius: 4,
-                        width: 16,
-                        height: 16,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: 15,
-                      }}
-                    >
-                      <CloseIcon />
-                    </TouchableOpacity>
-                  ) : undefined
-                }
-              />
-              <Input
-                testID={"loginPassword"}
-                accessibilityLabel="Enter your password"
-                marginBottom={2}
-                fontFamily={textStyles.regularFont}
-                fontSize={hp("1.6%")}
-                color={"black"}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
-                borderWidth={userNameFocused ? 2 : 2}
-                borderColor={"transparent"}
-                focusOutlineColor={passwordFocused ? "#0052CD" : "transparent"}
-                backgroundColor={passwordFocused ? "#fff" : "#E8EDF2"}
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-                borderRadius={15}
-                placeholder="Password"
-                leftElement={
-                  <View style={{ marginLeft: 15 }}>
-                    <StarIcon />
-                  </View>
-                }
-                rightElement={
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    style={{ marginRight: 15 }}
-                  >
-                    {showPassword ? <EyeOpenIcon /> : <EyeCrossedIcon />}
-                  </TouchableOpacity>
-                }
-              />
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate(authStackRoutes.ResetPasswordScreen)
-                }
-                style={{ alignSelf: "flex-end" }}
-              >
-                <Text
-                  style={{ color: "#0052CD", textDecorationLine: "underline" }}
-                >
-                  Forgot password?
-                </Text>
+        <GestureDetector gesture={pan}>
+          <Animated.View style={[styles.sheet, sheetStyle]}>
+            <View style={styles.pullArea}>
+              <TouchableOpacity onPress={handleClose} style={{ alignItems: 'center' }}>
+                <Ionicons name="chevron-down" size={24} color="#E8EDF2" />
+                <Text style={styles.backText}>Back to Sign in</Text>
               </TouchableOpacity>
-              <View
-                accessibilityLabel="Login button"
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              ></View>
             </View>
 
-            <VStack
-              justifyContent={"center"}
-              alignItems={"center"}
-              paddingY={10}
-            >
-              <TouchableOpacity
-                onPress={onSubmit}
-                style={{
-                  backgroundColor:
-                    isLoading || !userName || !password ? "#8F8F8F" : "#0052CD",
-                  borderRadius: 15,
-                  width: "100%",
-                  height: 45,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "row",
-                  marginTop: 20,
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>Hello again!</Text>
+
+              <FormTextField<Form>
+                control={control}
+                name="email"
+                placeholder="Email"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                rules={{
+                  required: 'Email is required',
+                  pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' },
                 }}
-                disabled={isLoading || !userName || !password}
+                left={<FontAwesome name="envelope-o" size={20} color="#0052CD" />}
+                hint=" "
+              />
+
+              <FormTextField<Form>
+                control={control}
+                name="password"
+                placeholder="Password"
+                secureTextEntry={!showPassword}
+                rules={{ required: 'Password is required', minLength: { value: 6, message: 'Min 6 chars' } }}
+                left={<FontAwesome5 name="star-of-life" size={20} color="#0052CD" />}
+                right={<Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#6B7280" />}
+                onRightPress={() => setShowPassword((v) => !v)}
+              />
+
+              <TouchableOpacity
+                onPress={() => navigation.push('/reset-password')}
+                style={{ alignSelf: 'flex-end', marginTop: 6 }}
               >
-                {isLoading && (
-                  <ActivityIndicator
-                    size="small"
-                    color="#fff"
-                    style={{ marginRight: 10 }}
-                  />
-                )}
-                <Text style={{ fontSize: 18, color: "#fff" }}>Log in</Text>
+                <Text style={styles.link}>Forgot password?</Text>
               </TouchableOpacity>
 
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: "#0052CD",
-                  marginTop: 15,
-                  marginBottom: 15,
-                  textAlign: "center",
-                }}
+              <TouchableOpacity
+                onPress={handleSubmit(onSubmit)}
+                disabled={isSubmitting || !isValid}
+                style={[
+                  styles.primaryBtn,
+                  { backgroundColor: isSubmitting || !isValid ? '#8F8F8F' : '#0052CD' },
+                ]}
               >
-                or
-              </Text>
-              <SocialButtons border={true} />
-            </VStack>
-          </VStack>
-        </View>
-      </Modal>
+                {isSubmitting && <ActivityIndicator size="small" color="#fff" style={{ marginRight: 10 }} />}
+                <Text style={styles.primaryBtnText}>Log in</Text>
+              </TouchableOpacity>
 
-      {!regularLoginEmail && (
-        <Modal
-          onBackdropPress={() => setResetModalOpen(false)}
-          isVisible={resetModalOpen}
-        >
-          <View style={styles.modal}>
-            <Text style={{ color: "black" }}>
-              For some privacy reasons, Ethora does not store any user
-              credential information. Please, create a new account if you forget
-              your password.
-            </Text>
-            <Button
-              title="Close"
-              onPress={() => setResetModalOpen(false)}
-              loading={false}
-              style={{ marginTop: 10 }}
-            />
-          </View>
-        </Modal>
-      )}
-    </>
+              <Text style={styles.or}>or</Text>
+              <GoogleSignInButton
+                backgroundColor="#0052CD"
+                textColor="#fff"
+                iconColor="#fff"
+              />
+            </View>
+          </Animated.View>
+        </GestureDetector>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 };
+
 const styles = StyleSheet.create({
-  modal: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 10,
-    justifyContent: "center",
-    alignItems: "center",
+  backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: {
+    width: '100%', height: '65%', backgroundColor: '#fff',
+    borderTopLeftRadius: 80, borderTopRightRadius: 80,
+    paddingTop: 40, paddingHorizontal: 45,
+    shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 }, elevation: 30,
   },
-  submitButton: {
-    backgroundColor: commonColors.primaryDarkColor,
-    width: 150,
-    padding: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 5,
-    marginTop: 10,
+  pullArea: { position: 'absolute', top: -80, left: '48%', justifyContent: 'center', alignItems: 'center' },
+  backText: { marginTop: 17, color: '#E8EDF2', fontFamily: 'VarelaRound-Regular' },
+  title: { color: '#0052CD', fontFamily: 'Poppins-Regular', fontSize: 40, marginBottom: 24 },
+  link: { color: '#0052CD', textDecorationLine: 'underline' },
+  primaryBtn: {
+    borderRadius: 15, width: '100%', height: 45,
+    alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: 20,
   },
+  primaryBtnText: { fontSize: 18, color: '#fff' },
+  or: { fontSize: 13, color: '#0052CD', marginTop: 15, marginBottom: 15, textAlign: 'center' },
 });

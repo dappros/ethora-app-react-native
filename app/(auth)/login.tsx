@@ -2,26 +2,31 @@ import { View, Text, TextInput, Pressable, ImageBackground, Image } from 'react-
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '@/src/store';
-import { loginThunk } from '@/src/modules/auth/store/auth.slice';
 import { loginScreenBackgroundImage, logoPath } from '@/src/core/docs/config';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import {
     CreateAccountButton,
     GoogleSignInButton,
     RegularLoginLabel,
+    RegularLoginModal,
 } from '@/src/modules/auth/components';
+import { useConfig } from '@/src/modules/config/hooks';
+import { useAuth } from '@/src/modules/auth/hooks';
 
 
 export default function Login() {
+  const config = useConfig();
   const router = useRouter();
+  const {status} = useAuth();
   
   const dispatch = useAppDispatch();
-  const { status, error } = useAppSelector((s) => s.auth);
 
   const [defaultLoginOpen, setDefaultLoginOpen] = useState(false);
 
 
   const navigateToRegisterScreen = () => router.push('/register');
+
+
 
   return (
     <ImageBackground
@@ -68,7 +73,7 @@ export default function Login() {
               navigateToRegisterScreen={navigateToRegisterScreen}
             />
 
-              <RegularLoginLabel setOpen={() => router.push('/login')} />
+              <RegularLoginLabel setOpen={() => setDefaultLoginOpen(true)} />
             
             {/* <View className="mt-11 items-center">
               <SocialButtons />
@@ -77,13 +82,13 @@ export default function Login() {
         </View>
       </View>
 
-      {/* <View style={{ position: 'absolute' }}>
+      <View style={{ position: 'absolute' }}>
         <RegularLoginModal
           isOpen={defaultLoginOpen}
           onClose={() => setDefaultLoginOpen(false)}
           navigation={router}
         />
-      </View> */}
+      </View>
     </ImageBackground>
   );
 }

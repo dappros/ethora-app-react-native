@@ -1,56 +1,106 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { loginApi } from '../fetch/auth.api';
-import type { User } from '../types/types';
+import { createSlice } from '@reduxjs/toolkit';
+import { authCheckRequest, authLoginRequest, autRefreshRequest } from '@modules/auth/store/auth.thunk';
+import { AuthSLiceState, UserType } from '@modules/auth//types';
+import { tokenStorage } from '@/src/core/lib/tokenStorage';
 
-type AuthState = {
-  user: User;
-  token: string | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error?: string;
+export const initialState: AuthSLiceState = {
+  user: {} as UserType,
+  status: 'unset',
+  checked: false,
+  rememberMe: false,
+  token: '',
+  refreshToken: '',
+  eventToken: '',
 };
 
-const initialState: AuthState = {
-  user: null,
-  token: null,
-  status: 'idle',
-};
-
-export const loginThunk = createAsyncThunk(
-  'auth/login',
-  async (payload: { email: string; password: string }) => {
-    const res = await loginApi(payload.email, payload.password);
-    return res;
-  }
-);
-
-const slice = createSlice({
+export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout(state) {
-      state.user = null;
-      state.token = null;
-      state.status = 'idle';
-      state.error = undefined;
+    authLogout: (state) => {
+      Object.assign(state, initialState);
+
+      tokenStorage.clear();
     },
-    restore(state, action: PayloadAction<{ token: string; user: User }>) {
-      state.token = action.payload.token;
-      state.user = action.payload.user;
-    },
+    setToken: (state, { payload }) => {
+      state.token = payload.token;
+    }
   },
-  extraReducers: (b) => {
-    b.addCase(loginThunk.pending, (s) => { s.status = 'loading'; s.error = undefined; });
-    b.addCase(loginThunk.fulfilled, (s, a) => {
-      s.status = 'succeeded';
-      s.token = a.payload.token;
-      s.user = a.payload.user;
+  extraReducers: (builder) => {
+    // LOGIN________________
+    builder.addCase(authLoginRequest.pending, (state) => {
+      state.status = 'loading';
     });
-    b.addCase(loginThunk.rejected, (s, a) => {
-      s.status = 'failed';
-      s.error = a.error.message || 'Login failed';
+
+    builder.addCase(authLoginRequest.fulfilled, (state, { payload }) => {
+      state.status = 'success';
+      state.checked = true;
+      state.token = payload.token;
+      state.refreshToken = payload.refreshToken;
+      state.user = payload.user;
+
+      const tokensAll = {
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        wsToken: payload.wsToken,
+      }
+
+      tokenStorage.setAll(tokensAll);
     });
-  },
+
+    builder.addCase(authLoginRequest.rejected, (state, { payload }) => {
+      console.log('payload', payload);
+      state.status = 'error';
+    });
+
+
+    // Check________________
+    builder.addCase(authCheckRequest.pending, (state) => {
+      state.status = 'loading';
+    });
+
+    builder.addCase(authCheckRequest.fulfilled, (state, { payload }) => {
+      state.status = 'success';
+      state.checked = true;
+      state.token = payload.token;
+      state.refreshToken = payload.refreshToken;
+      state.user = payload.user;
+
+      const tokensAll = {
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        wsToken: payload.wsToken,
+      }
+
+      tokenStorage.setAll(tokensAll);
+    });
+
+    builder.addCase(authCheckRequest.rejected, (state) => {
+      state.status = 'error';
+    });
+
+    // Check ________________
+    builder.addCase(autRefreshRequest.pending, (state) => {
+      state.status = 'loading';
+    });
+     builder.addCase(autRefreshRequest.fulfilled, (state, { payload }) => {
+      state.status = 'success';
+      state.token = payload.token;
+      state.refreshToken = payload.refreshToken;
+
+      const tokensAll = {
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        wsToken: payload.wsToken,
+      }
+
+      tokenStorage.setAll(tokensAll);
+    });
+     builder.addCase(autRefreshRequest.rejected, (state) => {
+      state.status = 'error';
+    });
+
+  }
 });
 
-export const { logout, restore } = slice.actions;
-export default slice.reducer;
+export const { authLogout, setToken } = authSlice.actions;

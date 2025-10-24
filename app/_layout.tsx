@@ -1,41 +1,44 @@
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Slot, Stack, useRouter, useSegments } from 'expo-router';
 import { Provider } from 'react-redux';
-import { store, useAppSelector, useAppDispatch } from '@/src/store';
-import { useEffect } from 'react';
-import { restore } from '@/src/modules/auth/store/auth.slice';
+import { store } from '@/src/store';
+import { useEffect, useRef, useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useAuth } from '@/src/modules/auth/hooks';
+import { useConfig } from '@/src/modules/config/hooks';
+import { tokenStorage } from '@/src/core/lib/tokenStorage';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
+import { View, Text } from 'react-native';
 
-
-// если хочешь восстановление токена из SecureStore — добавь тут
-
-export default function RootLayout() {
-  return (
-    <Provider store={store}>
-      <Slot />
-    </Provider>
-  );
-}
+export const EXPO_PUBLIC_DOMAIN_NAME = process.env.EXPO_PUBLIC_DOMAIN_NAME as string;
 
 function AuthGate() {
   const router = useRouter();
   const segments = useSegments();
-  const { token } = useAppSelector((s) => s.auth);
-  const dispatch = useAppDispatch();
+  const auth = useAuth();
+  const { geConfigApp } = useConfig();
+
+  const [token, setToken] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const navigatedRef = useRef(false);
 
   useEffect(() => {
-    // пример восстановления (демо-данные)
-    dispatch(restore({ token: null as any, user: null })); // если нужно
+    geConfigApp(EXPO_PUBLIC_DOMAIN_NAME);
+    auth.check();
   }, []);
-
-  useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)';
-    if (!token && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if (token && inAuthGroup) {
-      router.replace('/(app)');
-    }
-  }, [segments, token]);
 
   return null;
 }
 
+export default function RootLayout() {
+  return (
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <AuthGate />
+          <Stack screenOptions={{ headerShown: false }} />
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </Provider>
+  );
+}
