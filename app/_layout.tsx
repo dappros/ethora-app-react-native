@@ -9,6 +9,7 @@ import { tokenStorage } from '@/src/core/lib/tokenStorage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
 import { View, Text } from 'react-native';
+import { Loading } from '@/src/core/components';
 
 export const EXPO_PUBLIC_DOMAIN_NAME = process.env.EXPO_PUBLIC_DOMAIN_NAME as string;
 
@@ -16,18 +17,51 @@ function AuthGate() {
   const router = useRouter();
   const segments = useSegments();
   const auth = useAuth();
-  const { geConfigApp } = useConfig();
+  const { geConfigApp, status: configStatus } = useConfig();
 
-  const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const navigatedRef = useRef(false);
 
+  // Инициализация: сначала CHECK, потом CONFIG
   useEffect(() => {
-    geConfigApp(EXPO_PUBLIC_DOMAIN_NAME);
-    auth.check();
+    const initialize = async () => {
+      try {
+        await auth.check();
+        await geConfigApp(EXPO_PUBLIC_DOMAIN_NAME);
+        setReady(true);
+      } catch (error) {
+        console.log('Initialization error:', error);
+        setReady(true);
+      }
+    };
+    
+    initialize();
   }, []);
 
-  return null;
+  useEffect(() => {
+    if (!ready || navigatedRef.current) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const hasToken = !!auth.token;
+
+    if (!hasToken && !inAuthGroup) {
+      navigatedRef.current = true;
+      router.replace('/(auth)/login');
+    } else if (hasToken && inAuthGroup) {
+      navigatedRef.current = true;
+      router.replace('/(app)');
+    }
+  }, [ready, segments, auth.token]);
+
+  if (!ready) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <Loading size={50} color="#0052CD" backgroundColor="#000000" />
+      </View>
+    );
+  }
+
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {
@@ -36,7 +70,6 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <AuthGate />
-          <Stack screenOptions={{ headerShown: false }} />
         </GestureHandlerRootView>
       </SafeAreaProvider>
     </Provider>
