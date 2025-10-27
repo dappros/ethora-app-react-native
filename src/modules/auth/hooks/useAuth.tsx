@@ -1,9 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/src/store";
 import { useCallback } from "react";
-import { UseAuthReturn, AuthLoginFetchDataValue } from "@modules/auth/types";
+import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
   authCheckRequest,
   authLoginRequest,
+  authRegistrationRequest,
   authSlice,
   autRefreshRequest,
 } from "@modules/auth/store";
@@ -21,6 +22,13 @@ export const useAuth = (): UseAuthReturn => {
   const login = useCallback(
     (value: AuthLoginFetchDataValue) => {
       return dispatch(authLoginRequest(value)).unwrap();
+    },
+    [dispatch]
+  );
+
+  const register = useCallback(
+    (value: AuthRegistrationFetchDataValue) => {
+      return dispatch(authRegistrationRequest(value)).unwrap();
     },
     [dispatch]
   );
@@ -45,6 +53,7 @@ export const useAuth = (): UseAuthReturn => {
     checked,
     rememberMe,
     login,
+    register,
     check,
     logout,
     refresh,

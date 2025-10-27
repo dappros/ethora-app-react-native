@@ -13,51 +13,48 @@ import {
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 interface ButtonProps {
-  loading?: boolean;
+  isSubmitting?: boolean;
+  isValid?: boolean;
   onPress: () => void;
   title: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
-  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  loading,
+  isSubmitting,
+  isValid,
   onPress,
   title,
   style,
   textStyle,
-  disabled,
 }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={loading || disabled}
+      disabled={isSubmitting || !isValid}
       accessibilityLabel={title}
-      style={[styles.submitButton, style]}>
+      style={[styles.submitButton, { backgroundColor: isSubmitting || !isValid ? '#8F8F8F' : '#0052CD' }, style]}>
       <View
         style={{
           alignItems: 'center',
         }}>
-        <Text style={[styles.submitButtonText, textStyle]}>
-          {loading ? <ActivityIndicator color={'white'} size={30} /> : title}
-        </Text>
       </View>
+
+      {isSubmitting && <ActivityIndicator size="small" color="#fff" style={{ marginRight: 10 }} />}
+      <Text style={[styles.primaryBtnText, textStyle]}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   submitButton: {
-    backgroundColor: '#003E9C',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
+    borderRadius: 15, width: '100%', height: 45,
+    alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: 20,
   },
+  primaryBtnText: { fontSize: 18, color: '#fff' },
   submitButtonText: {
     fontSize: hp('1.5%'),
     color: '#FFFFFF',

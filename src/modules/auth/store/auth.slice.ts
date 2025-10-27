@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { authCheckRequest, authLoginRequest, autRefreshRequest } from '@modules/auth/store/auth.thunk';
+import { authCheckRequest, authLoginRequest, authRegistrationRequest, autRefreshRequest } from '@modules/auth/store/auth.thunk';
 import { AuthSLiceState, UserType } from '@modules/auth//types';
 import { tokenStorage } from '@/src/core/lib/tokenStorage';
 
@@ -49,6 +49,32 @@ export const authSlice = createSlice({
     });
 
     builder.addCase(authLoginRequest.rejected, (state, { payload }) => {
+      console.log('payload', payload);
+      state.status = 'error';
+    });
+
+    // REGISTRATION________________
+    builder.addCase(authRegistrationRequest.pending, (state) => {
+      state.status = 'loading';
+    });
+
+    builder.addCase(authRegistrationRequest.fulfilled, (state, { payload }) => {
+      state.status = 'success';
+      state.checked = true;
+      state.token = payload.token;
+      state.refreshToken = payload.refreshToken;
+      state.user = payload.user;
+
+      const tokensAll = {
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        wsToken: payload.wsToken,
+      }
+
+      tokenStorage.setAll(tokensAll);
+    });
+
+    builder.addCase(authRegistrationRequest.rejected, (state, { payload }) => {
       console.log('payload', payload);
       state.status = 'error';
     });
