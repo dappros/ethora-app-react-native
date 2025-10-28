@@ -1,10 +1,11 @@
 import { router } from "expo-router";
 import { View, Text, TouchableOpacity, ImageBackground, StyleSheet } from "react-native";
 import { whiteScreenBackgroundImage } from '@/src/core/docs/config';
-import { Button, FormTextField, Turnstile } from "@/src/core/components";
+import { Button, FormTextField } from "@/src/core/components";
+import { getTurnstileToken } from "@/src/core/captcha/getTurnstileToken";
 import { GoogleSignInButton } from "@/src/modules/auth/components";
 import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/src/modules/auth/hooks";
 
@@ -14,9 +15,9 @@ export default function Register() {
   const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
-  const [cfToken, setCfToken] = useState<string | null>(null);
 
-  const SITE_KEY = process.env.EXPO_PUBLIC_SITE_KEY! as string;
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // const SITE_KEY = '1x00000000000000000000AA';
 
   const commonDomains = [
     'gmail.com',
@@ -88,6 +89,18 @@ export default function Register() {
     mode: 'onChange',
   });
   
+  useEffect(() => {
+    const fetchTurnstileToken = async () => {
+      const turnstileTokenE = await getTurnstileToken();
+      console.log("turnstileTokenE", turnstileTokenE);
+      setTurnstileToken(turnstileTokenE);
+    };
+    fetchTurnstileToken();
+  }, []);
+
+   console.log("turnstileToken", turnstileToken);
+
+
 
   const onSubmit = async ({ firstName, lastName, email, password }: Form) => {
     const suggested = suggestEmail(email);
@@ -100,16 +113,10 @@ export default function Register() {
       return;
     }
 
-    if (!cfToken || cfToken.trim() === '') {
-      setError('email', { 
-        type: 'server', 
-        message: 'Please complete the security verification' 
-      });
-      return;
-    }
-
     try {
-      await register({ firstName, lastName, email, password, cfToken });
+      
+      
+      await register({ firstName, lastName, email, password, cfToken: turnstileToken });
       clearErrors();
       router.push("(app)");
     } catch (error: any) {
@@ -136,7 +143,7 @@ export default function Register() {
       </TouchableOpacity>
 
       <View>
-              <Text style={styles.title}>Hello again!</Text>
+              <Text style={styles.title}>Hi, there!</Text>
 
                 <FormTextField<Form>
                   control={control}
@@ -191,15 +198,6 @@ export default function Register() {
                 right={<Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#6B7280" />}
                 onRightPress={() => setShowPassword((v) => !v)}
               />
-
-              <View style={{ marginVertical: 16 }}>
-                <Turnstile
-                  siteKey={SITE_KEY}
-                  onVerify={(token) => setCfToken(token)}
-                  onError={(error) => console.log('Turnstile error:', error)}
-                  theme="light"
-                />
-              </View>
 
               <Button
               title="Sign up"

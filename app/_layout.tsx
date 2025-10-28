@@ -7,6 +7,7 @@ import { useAuth } from '@/src/modules/auth/hooks';
 import { useConfig } from '@/src/modules/config/hooks';
 import { tokenStorage } from '@/src/core/lib/tokenStorage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 import '../global.css';
 import { View, Text } from 'react-native';
 import { Loading } from '@/src/core/components';
@@ -36,6 +37,34 @@ function AuthGate() {
     };
     
     initialize();
+  }, []);
+
+  // Обработка deep links для Turnstile
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const url = new URL(event.url);
+      if (url.pathname === '/turnstile') {
+        const token = url.searchParams.get('token');
+        const error = url.searchParams.get('error');
+        
+        if (token) {
+          console.log('Turnstile token received:', token);
+        } else if (error) {
+          console.log('Turnstile error:', error);
+        }
+      }
+    };
+
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+    
+    // Проверяем initial URL при запуске
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink({ url });
+      }
+    });
+
+    return () => subscription?.remove();
   }, []);
 
   useEffect(() => {
