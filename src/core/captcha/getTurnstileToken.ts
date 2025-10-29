@@ -14,10 +14,10 @@ export async function getTurnstileToken(): Promise<string> {
     console.log('WebBrowser result:', result);
     
     if (result.type === 'success' && result.url) {
-      // Парсим токен из URL
-      const urlObj = new URL(result.url);
-      const token = urlObj.searchParams.get('token');
-      const error = urlObj.searchParams.get('error');
+      // Парсим токен из URL используя expo-linking
+      const parsed = Linking.parse(result.url);
+      const token = parsed.queryParams?.token as string | undefined;
+      const error = parsed.queryParams?.error as string | undefined;
       
       console.log('Token from URL:', token);
       console.log('Error from URL:', error);

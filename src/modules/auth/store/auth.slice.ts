@@ -60,18 +60,6 @@ export const authSlice = createSlice({
 
     builder.addCase(authRegistrationRequest.fulfilled, (state, { payload }) => {
       state.status = 'success';
-      state.checked = true;
-      state.token = payload.token;
-      state.refreshToken = payload.refreshToken;
-      state.user = payload.user;
-
-      const tokensAll = {
-        token: payload.token,
-        refreshToken: payload.refreshToken,
-        wsToken: payload.wsToken,
-      }
-
-      tokenStorage.setAll(tokensAll);
     });
 
     builder.addCase(authRegistrationRequest.rejected, (state, { payload }) => {

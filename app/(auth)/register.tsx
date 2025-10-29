@@ -12,12 +12,9 @@ import { useAuth } from "@/src/modules/auth/hooks";
 type Form = { firstName: string; lastName: string; email: string; password: string };
 
 export default function Register() {
-  const { register } = useAuth();
+  const { register, login, status } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
-
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  // const SITE_KEY = '1x00000000000000000000AA';
 
   const commonDomains = [
     'gmail.com',
@@ -108,6 +105,7 @@ export default function Register() {
       const utm = "mobile-app";
       
       await register({ firstName, lastName, email, password, cfToken, utm });
+      await login({ email, password });
       router.push("(app)");
     } catch (error: any) {
       setError('email', { 

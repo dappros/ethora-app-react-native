@@ -16,9 +16,30 @@ export const tokenStorage = {
   getWsToken: () => SecureStore.getItemAsync(WS_KEY),
 
   setAll: async (t: Tokens) => {
-    await SecureStore.setItemAsync(ACCESS_KEY, t.token);
-    if (t.refreshToken) await SecureStore.setItemAsync(REFRESH_KEY, t.refreshToken);
-    if (t.wsToken) await SecureStore.setItemAsync(WS_KEY, t.wsToken);
+    // Логируем что приходит для отладки
+    console.log('Saving tokens:', {
+      token: t.token,
+      tokenType: typeof t.token,
+      refreshToken: t.refreshToken,
+      refreshTokenType: typeof t.refreshToken,
+      wsToken: t.wsToken,
+      wsTokenType: typeof t.wsToken,
+    });
+
+    // Гарантируем что все значения - строки и не undefined/null
+    if (t.token && typeof t.token === 'string') {
+      await SecureStore.setItemAsync(ACCESS_KEY, t.token);
+    } else {
+      throw new Error(`Invalid token type: ${typeof t.token}, value: ${t.token}`);
+    }
+    
+    if (t.refreshToken && typeof t.refreshToken === 'string') {
+      await SecureStore.setItemAsync(REFRESH_KEY, t.refreshToken);
+    }
+    
+    if (t.wsToken && typeof t.wsToken === 'string') {
+      await SecureStore.setItemAsync(WS_KEY, t.wsToken);
+    }
   },
 
   clear: async () => {

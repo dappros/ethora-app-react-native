@@ -19,7 +19,7 @@ async function refreshTokens(baseURL: string): Promise<Tokens> {
   
     const { data } = await axios.post<{
       token: string; refreshToken?: string; wsToken?: string;
-    }>(`${baseURL}/users/refresh`, { refreshToken: rt });
+    }>(`${$api}/users/refresh`, { refreshToken: rt });
   
     return {
       token: data.token,

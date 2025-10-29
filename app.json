@@ -11,13 +11,7 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-web-browser",
-      [
-        "expo-linking",
-        {
-          "scheme": "ethoraappreactnative"
-        }
-      ]
+      "expo-web-browser"
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
