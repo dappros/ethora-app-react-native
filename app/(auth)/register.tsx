@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { View, Text, TouchableOpacity, ImageBackground, StyleSheet, ActivityIndicator, Animated } from "react-native";
+import { View, Text, TouchableOpacity, ImageBackground, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { whiteScreenBackgroundImage } from '@/src/core/docs/config';
 import { Button, FormTextField } from "@/src/core/components";
 import { getTurnstileToken } from "@/src/core/captcha/getTurnstileToken";
@@ -173,6 +173,10 @@ export default function Register() {
     }
   };
   
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
     <ImageBackground
       source={whiteScreenBackgroundImage}
@@ -182,12 +186,24 @@ export default function Register() {
         height: '100%',
       }}
     >
-    <View className="flex-1 justify-center px-11 relative">
-      <TouchableOpacity className="absolute top-[45px] left-4" onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <View style={{ flex: 1 }}>
+              <View className="flex-1 justify-center px-11 relative">
+                <TouchableOpacity className="absolute top-[45px] left-4" onPress={() => router.back()}>
+                  <Ionicons name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
 
-      <View>
+                <View>
               <Text style={styles.title}>Hi, there!</Text>
 
                 <FormTextField<Form>
@@ -264,7 +280,6 @@ export default function Register() {
                   activeOpacity={0.8}
                 >
                   <View style={styles.turnstileContent}>
-                    {/* Иконка */}
                     <View style={styles.turnstileIconContainer}>
                       {isLoadingTurnstile ? (
                         <ActivityIndicator size="small" color="#0052CD" />
@@ -279,7 +294,6 @@ export default function Register() {
                       )}
                     </View>
 
-                    {/* Текст */}
                     <View style={styles.turnstileTextContainer}>
                       <Text
                         style={[
@@ -300,11 +314,11 @@ export default function Register() {
                       )}
                     </View>
 
-                    {turnstileToken && (
+                    {/* {turnstileToken && (
                       <View style={styles.turnstileBadge}>
                         <Ionicons name="shield" size={16} color="#fff" />
                       </View>
-                    )}
+                    )} */}
                   </View>
                 </TouchableOpacity>
               </Animated.View>
@@ -322,8 +336,12 @@ export default function Register() {
                 textColor="#fff"
                 iconColor="#fff"
               />
+              </View>
             </View>
-    </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
