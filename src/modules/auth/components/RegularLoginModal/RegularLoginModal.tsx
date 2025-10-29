@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Router } from 'expo-router';
@@ -79,6 +80,14 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
   }, [isOpen]);
 
   const handleClose = () => closeAnim(() => { setVisible(false); onClose(); });
+
+  const handleForgotPassword = async () => {
+    try {
+      await WebBrowser.openBrowserAsync('https://app.ethora.com/resetPassword');
+    } catch (error) {
+      console.error('Error opening browser:', error);
+    }
+  };
 
   const startY = useSharedValue(0);
   const pan = Gesture.Pan()
@@ -179,7 +188,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
               />
 
               <TouchableOpacity
-                onPress={() => navigation.push('/reset-password')}
+                onPress={handleForgotPassword}
                 style={{ alignSelf: 'flex-end', marginTop: 6 }}
               >
                 <Text style={styles.link}>Forgot password?</Text>
