@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Dimensions,
   KeyboardAvoidingView,
+  Keyboard,
   Modal,
   Platform,
   StyleSheet,
@@ -81,6 +82,10 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
 
   const handleClose = () => closeAnim(() => { setVisible(false); onClose(); });
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   const handleForgotPassword = async () => {
     try {
       await WebBrowser.openBrowserAsync('https://app.ethora.com/resetPassword');
@@ -149,17 +154,20 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
       <KeyboardAvoidingView
         behavior={Platform.select({ ios: 'padding', android: undefined })}
         style={{ flex: 1, justifyContent: 'flex-end' }}
+        keyboardVerticalOffset={Platform.select({ ios: 0, android: 20 })}
       >
         <GestureDetector gesture={pan}>
           <Animated.View style={[styles.sheet, sheetStyle]}>
-            <View style={styles.pullArea}>
-              <TouchableOpacity onPress={handleClose} style={{ alignItems: 'center' }}>
-                <Ionicons name="chevron-down" size={24} color="#E8EDF2" />
-                <Text style={styles.backText}>Back to Sign in</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableWithoutFeedback onPress={dismissKeyboard}>
+              <View style={{ flex: 1 }}>
+                <View style={styles.pullArea}>
+                  <TouchableOpacity onPress={handleClose} style={{ alignItems: 'center' }}>
+                    <Ionicons name="chevron-down" size={24} color="#E8EDF2" />
+                    <Text style={styles.backText}>Back to Sign in</Text>
+                  </TouchableOpacity>
+                </View>
 
-            <View style={{ flex: 1 }}>
+                <View style={{ flex: 1 }}>
               <Text style={styles.title}>Hello again!</Text>
 
               <FormTextField<Form>
@@ -212,7 +220,9 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                 textColor="#fff"
                 iconColor="#fff"
               />
-            </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </Animated.View>
         </GestureDetector>
       </KeyboardAvoidingView>
@@ -229,7 +239,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 10,
     shadowOffset: { width: 0, height: 2 }, elevation: 30,
   },
-  pullArea: { position: 'absolute', top: -80, left: '48%', justifyContent: 'center', alignItems: 'center' },
+  pullArea: { position: 'absolute', top: -110, width: '100%', justifyContent: 'center', alignItems: 'center' },
   backText: { marginTop: 17, color: '#E8EDF2', fontFamily: 'VarelaRound-Regular' },
   title: { color: '#0052CD', fontFamily: 'Poppins-Regular', fontSize: 40, marginBottom: 24 },
   link: { color: '#0052CD', textDecorationLine: 'underline' },
