@@ -1,11 +1,11 @@
 import { router } from "expo-router";
-import { View, Text, TouchableOpacity, ImageBackground, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, ImageBackground, StyleSheet, ActivityIndicator, Animated } from "react-native";
 import { whiteScreenBackgroundImage } from '@/src/core/docs/config';
 import { Button, FormTextField } from "@/src/core/components";
 import { getTurnstileToken } from "@/src/core/captcha/getTurnstileToken";
 import { GoogleSignInButton } from "@/src/modules/auth/components";
 import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/src/modules/auth/hooks";
 
@@ -15,6 +15,10 @@ export default function Register() {
   const { register, login, status } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [isLoadingTurnstile, setIsLoadingTurnstile] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
 
   const commonDomains = [
     'gmail.com',
@@ -86,6 +90,53 @@ export default function Register() {
     mode: 'onChange',
   });
 
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 100,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: turnstileToken ? 1 : 0.9,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [turnstileToken, scaleAnim, opacityAnim]);
+
+  const handleTurnstileCheck = async () => {
+    if (turnstileToken) {
+      setTurnstileToken(null);
+      return;
+    }
+
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setIsLoadingTurnstile(true);
+    try {
+      const token = await getTurnstileToken();
+      setTurnstileToken(token);
+      console.log('Turnstile token received:', token);
+    } catch (error) {
+      console.error('Turnstile error:', error);
+    } finally {
+      setIsLoadingTurnstile(false);
+    }
+  };
+
   const onSubmit = async ({ firstName, lastName, email, password }: Form) => {
     const suggested = suggestEmail(email);
     if (suggested && suggested !== email) {
@@ -98,13 +149,19 @@ export default function Register() {
     }
 
     try {
-      const cfToken = await getTurnstileToken();
+      if (!turnstileToken) {
+        setError('email', {
+          type: 'manual',
+          message: 'Please complete the bot verification',
+        });
+        return;
+      }
 
-      console.log("register", { firstName, lastName, email, password, cfToken });
+      console.log("register", { firstName, lastName, email, password, cfToken: turnstileToken });
 
       const utm = "mobile-app";
       
-      await register({ firstName, lastName, email, password, cfToken, utm });
+      await register({ firstName, lastName, email, password, cfToken: turnstileToken, utm });
       await login({ email, password });
       router.push("(app)");
     } catch (error: any) {
@@ -187,11 +244,76 @@ export default function Register() {
                 onRightPress={() => setShowPassword((v) => !v)}
               />
 
+              <Animated.View
+                style={[
+                  styles.turnstileContainer,
+                  {
+                    transform: [{ scale: scaleAnim }],
+                    opacity: opacityAnim,
+                  },
+                ]}
+              >
+                <TouchableOpacity
+                  style={[
+                    styles.turnstileCheckbox,
+                    turnstileToken && styles.turnstileCheckboxSuccess,
+                    isLoadingTurnstile && styles.turnstileCheckboxLoading,
+                  ]}
+                  onPress={handleTurnstileCheck}
+                  disabled={isLoadingTurnstile}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.turnstileContent}>
+                    {/* Иконка */}
+                    <View style={styles.turnstileIconContainer}>
+                      {isLoadingTurnstile ? (
+                        <ActivityIndicator size="small" color="#0052CD" />
+                      ) : turnstileToken ? (
+                        <View style={styles.successIconContainer}>
+                          <Ionicons name="checkmark-circle" size={32} color="#0052CD" />
+                        </View>
+                      ) : (
+                        <View style={styles.shieldIconContainer}>
+                          <Ionicons name="shield-outline" size={28} color="#8F8F8F" />
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Текст */}
+                    <View style={styles.turnstileTextContainer}>
+                      <Text
+                        style={[
+                          styles.turnstileLabel,
+                          turnstileToken && styles.turnstileLabelSuccess,
+                        ]}
+                      >
+                        {turnstileToken
+                          ? 'Verification complete'
+                          : isLoadingTurnstile
+                          ? 'Verifying...'
+                          : 'Verify you are human'}
+                      </Text>
+                      {turnstileToken && (
+                        <Text style={styles.turnstileSubtext}>
+                          Protected by Cloudflare
+                        </Text>
+                      )}
+                    </View>
+
+                    {turnstileToken && (
+                      <View style={styles.turnstileBadge}>
+                        <Ionicons name="shield" size={16} color="#fff" />
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+
               <Button
               title="Sign up"
               onPress={handleSubmit(onSubmit)}
-              isSubmitting={isSubmitting}
-              isValid={isValid}
+              isSubmitting={status === 'loading'}
+              isValid={isValid && !!turnstileToken}
               />
 
               <Text style={styles.or}>or</Text>
@@ -225,4 +347,85 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: { fontSize: 18, color: '#fff' },
   or: { fontSize: 13, color: '#0052CD', marginTop: 15, marginBottom: 15, textAlign: 'center' },
+  turnstileContainer: {
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  turnstileCheckbox: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E8EDF2',
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  turnstileCheckboxSuccess: {
+    backgroundColor: '#F0F7FF',
+    borderColor: '#0052CD',
+    borderWidth: 2,
+  },
+  turnstileCheckboxLoading: {
+    borderColor: '#0052CD',
+    borderWidth: 2,
+  },
+  turnstileContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  turnstileIconContainer: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  shieldIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E8EDF2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E6F3FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  turnstileTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  turnstileLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#333',
+    fontFamily: 'Poppins-Medium',
+  },
+  turnstileLabelSuccess: {
+    color: '#0052CD',
+    fontWeight: '600',
+  },
+  turnstileSubtext: {
+    fontSize: 12,
+    color: '#8F8F8F',
+    marginTop: 4,
+    fontFamily: 'Poppins-Regular',
+  },
+  turnstileBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#0052CD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
 });

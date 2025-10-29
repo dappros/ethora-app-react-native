@@ -35,16 +35,13 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={isSubmitting || !isValid}
       accessibilityLabel={title}
       style={[styles.submitButton, { backgroundColor: isSubmitting || !isValid ? '#8F8F8F' : '#0052CD' }, style]}>
-      <View
-        style={{
-          alignItems: 'center',
-        }}>
-      </View>
-
-      {isSubmitting && <ActivityIndicator size="small" color="#fff" style={{ marginRight: 10 }} />}
-      <Text style={[styles.primaryBtnText, textStyle]}>
-        {title}
-      </Text>
+      {isSubmitting ? (
+        <ActivityIndicator size="small" color="#fff" />
+      ) : (
+        <Text style={[styles.primaryBtnText, textStyle]}>
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
