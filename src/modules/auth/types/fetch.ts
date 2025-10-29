@@ -65,4 +65,5 @@ export interface AuthRegistrationFetchDataValue {
   firstName: string;
   lastName: string;
   signupPlan?: string;
+  utm?: string;
 }

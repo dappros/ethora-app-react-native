@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { authCheck, authLogin, authRefresh } from '@modules/auth/fetch/auth.fetch';
+import { authCheck, authLogin, authRefresh, authRegistretion } from '@modules/auth/fetch/auth.fetch';
 import { AuthLoginFetchDataValue, AuthRefreshResponse, AuthRegistrationFetchDataValue, AuthResponse } from '@modules/auth/types';
 import { BaseAsyncThunkOptions } from '@core/types';
 
@@ -28,7 +28,7 @@ export const authRegistrationRequest = createAsyncThunk<
   'auth/sign-up-with-email',
   async (data, thunkApi) => {
     try {
-      const response = await authLogin(data);
+      const response = await authRegistretion(data);
 
       return response.data;
     } catch (error) {

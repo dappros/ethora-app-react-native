@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { AuthLoginFetchDataValue, AuthRefreshResponse, AuthRegistrationFetchDataValue, AuthResponse } from '@modules/auth/types';
-import{ $api } from '@modules/auth/interceptors';
+import{ $api, $apiV2 } from '@modules/auth/interceptors';
 
 export const authLogin = (payload: AuthLoginFetchDataValue): Promise<AxiosResponse<AuthResponse>> => {
   return $api.post<AuthResponse>('/users/login-with-email', payload);
@@ -15,6 +15,6 @@ export const authRefresh = (): Promise<AxiosResponse<AuthRefreshResponse>> => {
 };
 
 export const authRegistretion = (payload: AuthRegistrationFetchDataValue): Promise<AxiosResponse<AuthResponse>> => {
-  return $api.post<AuthResponse>('/users/sign-up-with-email', payload);
+  return $apiV2.post<AuthResponse>('/users/sign-up-with-email', payload);
 };
 

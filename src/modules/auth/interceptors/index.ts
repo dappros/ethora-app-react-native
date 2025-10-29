@@ -10,6 +10,7 @@ const $apiV2 = axios.create({ withCredentials: true, baseURL: API_URL_V2 });
 
 if(EXPO_PUBLIC_APP_TOKEN) {
   $api.defaults.headers.common["Authorization"] = EXPO_PUBLIC_APP_TOKEN ;
+  $apiV2.defaults.headers.common["Authorization"] = EXPO_PUBLIC_APP_TOKEN ;
 }
 
 async function refreshTokens(baseURL: string): Promise<Tokens> {

@@ -88,19 +88,6 @@ export default function Register() {
     defaultValues: { firstName: '', lastName: '', email: '', password: '' },
     mode: 'onChange',
   });
-  
-  useEffect(() => {
-    const fetchTurnstileToken = async () => {
-      const turnstileTokenE = await getTurnstileToken();
-      console.log("turnstileTokenE", turnstileTokenE);
-      setTurnstileToken(turnstileTokenE);
-    };
-    fetchTurnstileToken();
-  }, []);
-
-   console.log("turnstileToken", turnstileToken);
-
-
 
   const onSubmit = async ({ firstName, lastName, email, password }: Form) => {
     const suggested = suggestEmail(email);
@@ -114,10 +101,13 @@ export default function Register() {
     }
 
     try {
+      const cfToken = await getTurnstileToken();
+
+      console.log("register", { firstName, lastName, email, password, cfToken });
+
+      const utm = "mobile-app";
       
-      
-      await register({ firstName, lastName, email, password, cfToken: turnstileToken });
-      clearErrors();
+      await register({ firstName, lastName, email, password, cfToken, utm });
       router.push("(app)");
     } catch (error: any) {
       setError('email', { 
