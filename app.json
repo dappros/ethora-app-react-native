@@ -10,6 +10,7 @@
       "tsconfigPaths": true
     },
     "plugins": [
+      "expo-dev-client",
       "expo-secure-store",
       "expo-web-browser"
     ],
@@ -18,7 +19,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },

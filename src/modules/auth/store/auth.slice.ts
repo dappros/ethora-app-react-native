@@ -93,7 +93,8 @@ export const authSlice = createSlice({
       state.status = 'error';
     });
 
-    // Check ________________
+
+    // REFRESH ________________
     builder.addCase(autRefreshRequest.pending, (state) => {
       state.status = 'loading';
     });
