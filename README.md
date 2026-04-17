@@ -1,83 +1,45 @@
-# ethora-app-react-native
+# ethora-app-react-native — Legacy
 
-Full Ethora App engine in React Native
+> ⚠️ **This repository is no longer actively maintained.**
+>
+> It is preserved for historical reference only. New mobile development should target one of the actively-maintained Ethora SDKs below.
 
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+**Part of the [Ethora SDK ecosystem](https://github.com/dappros/ethora#ecosystem)** — see all SDKs, tools, and sample apps.
 
-# Getting Started
+## What was this?
 
-> **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+A full Ethora app engine implemented in React Native. It was the original mobile reference app, predating the dedicated React Native chat SDK and the native Android / iOS SDKs. Code defaults still point at the legacy `*.ethoradev.com` cluster and various retired backends (`app.dappros.com`, `xmpp.qa.ethoradev.com`, `push.qa.ethoradev.com`, etc.).
 
-## Step 1: Start the Metro Server
+## Use these instead
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+| If you want… | Use |
+|--------------|-----|
+| React Native chat in your existing app | [`@ethora/chat-component-rn`](https://github.com/dappros/ethora-chat-component-rn) |
+| React.js (web) chat in your app | [`@ethora/chat-component`](https://github.com/dappros/ethora-chat-component) |
+| Native Android (Kotlin / Compose) | [`ethora-sdk-android`](https://github.com/dappros/ethora-sdk-android) (sample app: [`ethora-sample-android`](https://github.com/dappros/ethora-sample-android)) |
+| Native iOS (Swift / SwiftUI) | [`ethora-sdk-swift`](https://github.com/dappros/ethora-sdk-swift) |
+| WordPress integration | [`ethora-wp-plugin`](https://github.com/dappros/ethora-wp-plugin) |
+| One-shot project setup | `npx @ethora/setup` ([`ethora-setup`](https://github.com/dappros/ethora-setup)) |
+| Live web app | [app.chat.ethora.com](https://app.chat.ethora.com) |
 
-To start Metro, run the following command from the _root_ of your React Native project:
+## Default endpoints (current platform)
 
-```bash
-# using npm
-npm start
+The current Ethora Cloud production endpoints (used by all maintained SDKs) are:
 
-# OR using Yarn
-yarn start
-```
+| Purpose | Value |
+|---------|-------|
+| Web app | `https://app.chat.ethora.com` |
+| API | `https://api.chat.ethora.com` (Swagger: `https://api.chat.ethora.com/api-docs/#/`) |
+| XMPP WS | `wss://xmpp.chat.ethora.com:5443/ws` |
+| QA environment | `chat-qa.ethora.com` |
 
-## Step 2: Start your Application
+## Links
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+- Ethora monorepo: <https://github.com/dappros/ethora>
+- Documentation: <https://docs.ethora.com/>
+- Forum: <https://forum.ethora.com/>
+- Discord: <https://discord.gg/Sm6bAHA3ZC>
 
-### For Android
+## License
 
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
-
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+AGPL — see [LICENSE](./LICENSE). Commercial licenses available from Dappros.
