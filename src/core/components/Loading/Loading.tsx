@@ -16,7 +16,7 @@ export const Loading: React.FC<LoadingProps> = ({
   const innerRotation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Анимация внешнего круга (синий) - по часовой стрелке
+    // Outer circle animation (blue) - clockwise
     const outerAnimation = Animated.loop(
       Animated.timing(outerRotation, {
         toValue: 1,
@@ -26,7 +26,7 @@ export const Loading: React.FC<LoadingProps> = ({
       })
     );
 
-    // Анимация внутреннего круга (черный) - против часовой стрелки
+    // Inner circle animation (black) - counter-clockwise
     const innerAnimation = Animated.loop(
       Animated.timing(innerRotation, {
         toValue: 1,
@@ -62,7 +62,7 @@ export const Loading: React.FC<LoadingProps> = ({
 
   return (
     <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
-      {/* Внешний круг (синий) */}
+      {/* Outer circle (blue) */}
       <Animated.View
         style={{
           position: 'absolute',
@@ -85,7 +85,7 @@ export const Loading: React.FC<LoadingProps> = ({
         />
       </Animated.View>
 
-      {/* Внутренний круг (черный) */}
+      {/* Inner circle (black) */}
       <Animated.View
         style={{
           position: 'absolute',

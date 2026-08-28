@@ -12,23 +12,37 @@
     "plugins": [
       "expo-dev-client",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-audio",
+      "expo-video",
+      "expo-font",
+      "expo-router",
+      "expo-status-bar",
+      "expo-asset",
+      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF",
+          "imageWidth": 200
+        }
+      ]
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ethora.app"
+      "bundleIdentifier": "com.ethora.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -36,6 +50,11 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.ethora.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b79aedc2-ad0f-40ed-b8bd-4b54010d9f0f"
+      }
     }
   }
 }

@@ -61,6 +61,8 @@ export interface ModelApp {
     logoImage: string;
     sublogoImage: string;
     appTagline: string;
+    /** XMPP host of the app cluster, e.g. xmpp.chat-qa.ethora.com */
+    xmppHost?: string;
     firebaseWebConfigString?: string;
     firebaseConfigParsed?: {
       apiKey: string;

@@ -1,13 +1,15 @@
 import $api from '@modules/auth/interceptors';
-import { ModelApp } from '@modules/config/types';
+import { ModelApp, Workspace } from '@modules/config/types';
+import { apiBaseUrl } from '@modules/config/utils/workspace';
 
 type ApiResponse<T> = { result: T; success?: boolean; message?: string };
 
-export const getConfig = async (domainName?: string): Promise<ModelApp> => {
-  const { data } = await $api.get<ApiResponse<ModelApp>>(
-    '/apps/get-config',
-    { params: domainName ? { domainName } : undefined }
-  );
+/** GET https://api.[domain]/v1/apps/get-config?domainName=[domainName] */
+export const getConfig = async ({ domainName, domain }: Workspace): Promise<ModelApp> => {
+  const { data } = await $api.get<ApiResponse<ModelApp>>('/apps/get-config', {
+    baseURL: apiBaseUrl(domain),
+    params: { domainName },
+  });
 
   return data.result;
 };

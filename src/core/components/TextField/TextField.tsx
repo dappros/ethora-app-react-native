@@ -19,6 +19,8 @@ export type TextFieldProps = Omit<TextInputProps, 'style' | 'onChange'> & {
   containerStyle?: ViewStyle;
   inputStyle?: TextStyle;
   onRightPress?: () => void;
+  /** Focused border color (brand blue by default) */
+  accentColor?: string;
 };
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -31,15 +33,16 @@ export const TextField: React.FC<TextFieldProps> = ({
   containerStyle,
   inputStyle,
   editable = true,
+  accentColor = '#0052CD',
   ...inputProps
 }) => {
   const [focused, setFocused] = useState(false);
 
   const borderColor = useMemo(() => {
     if (error) return '#B91C1C';
-    if (focused) return '#0052CD';
+    if (focused) return accentColor;
     return 'transparent';
-  }, [error, focused]);
+  }, [error, focused, accentColor]);
 
   return (
     <View style={containerStyle}>

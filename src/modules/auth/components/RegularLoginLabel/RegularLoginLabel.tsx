@@ -2,9 +2,15 @@ import { TouchableOpacity, Text, View } from "react-native";
 
 interface RegularLoginLabelProps {
   setOpen: () => void;
+  textColor?: string;
+  linkColor?: string;
 }
 
-export const RegularLoginLabel = ({ setOpen }: RegularLoginLabelProps ) => {
+export const RegularLoginLabel = ({
+  setOpen,
+  textColor = '#fff',
+  linkColor = textColor,
+}: RegularLoginLabelProps) => {
   return (
     <View style={{
       flexDirection: 'row',
@@ -13,8 +19,9 @@ export const RegularLoginLabel = ({ setOpen }: RegularLoginLabelProps ) => {
       marginTop: 32,
     }}>
       <Text
-        className="text-white text-xs mr-1"
+        className="text-sm mr-1"
         style={{
+          color: textColor,
           fontFamily: 'VarelaRound-Regular',
         }}
       >
@@ -26,8 +33,9 @@ export const RegularLoginLabel = ({ setOpen }: RegularLoginLabelProps ) => {
         onPress={setOpen}
       >
         <Text
-          className="text-white text-xs"
+          className="text-sm"
           style={{
+            color: linkColor,
             fontFamily: 'Poppins-SemiBold',
             textDecorationLine: 'underline',
           }}

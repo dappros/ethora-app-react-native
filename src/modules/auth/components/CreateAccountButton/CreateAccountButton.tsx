@@ -4,10 +4,12 @@ import { TouchableOpacity, Text } from "react-native";
 
 interface CreateAccountButtonProps {
   navigateToRegisterScreen: any;
+  color?: string;
 }
 
 export const CreateAccountButton: FC<CreateAccountButtonProps> = ({
   navigateToRegisterScreen,
+  color = "#fff",
 }) => {
   return (
     <TouchableOpacity
@@ -20,11 +22,11 @@ export const CreateAccountButton: FC<CreateAccountButtonProps> = ({
         justifyContent: "center",
         alignItems: "center",
         borderWidth: 3,
-        borderColor: "#fff",
+        borderColor: color,
       }}
       onPress={navigateToRegisterScreen}
     >
-      <Text style={{ color: "#fff", fontSize: 15 }}>Create an account</Text>
+      <Text style={{ color, fontSize: 15 }}>Create an account</Text>
     </TouchableOpacity>
   );
 };

@@ -19,7 +19,7 @@
 // import { navigateToUserPage } from '@/src/utils/navigateToUserPage';
 // import { useRouter } from 'expo-router';
 
-// // обязательно для WebBrowser завершить сессию (iOS)
+// // required for WebBrowser to complete the session (iOS)
 // WebBrowser.maybeCompleteAuthSession();
 
 // function getFirebase(): FirebaseApp {
@@ -43,11 +43,11 @@
 //   const config = useAppStore.getState().currentApp;
 //   const router = useRouter();
 
-//   // clientId'ы возьми из Google Cloud OAuth (из Firebase → Authentication → Sign-in method → Google)
-//   const expoClientId    = config?.firebaseConfigParsed?.expoClientId;     // опционально
+//   // take clientIds from Google Cloud OAuth (Firebase → Authentication → Sign-in method → Google)
+//   const expoClientId    = config?.firebaseConfigParsed?.expoClientId;     // optional
 //   const iosClientId     = config?.firebaseConfigParsed?.iosClientId;
 //   const androidClientId = config?.firebaseConfigParsed?.androidClientId;
-//   const webClientId     = config?.firebaseConfigParsed?.webClientId;       // пригодится для dev/web
+//   const webClientId     = config?.firebaseConfigParsed?.webClientId;       // useful for dev/web
 
 //   const [request, response, promptAsync] = Google.useAuthRequest({
 //     expoClientId,
@@ -55,12 +55,12 @@
 //     androidClientId,
 //     webClientId,
 //     scopes: ['profile', 'email'],
-//     // использовать прокси в Expo Go — удобно в деве
+//     // use the proxy in Expo Go — handy in dev
 //     useProxy: true,
 //   });
 
 //   const signIn = async () => {
-//     // откроет системную UI авторизации Google
+//     // opens the system Google sign-in UI
 //     await promptAsync();
 //   };
 
@@ -78,10 +78,10 @@
 //       const result = await signInWithCredential(auth, credential);
 //       const user = result.user;
 
-//       // 2) idToken для бэкенда
+//       // 2) idToken for the backend
 //       const freshIdToken = await user.getIdToken();
 
-//       // 3) проверка email и регистрация/логин как на вебе
+//       // 3) check email and register/login like on web
 //       const email = user.email;
 //       if (!email) throw new Error('Email not provided by Google');
 
@@ -102,8 +102,8 @@
 //           throw new Error('Social registration failed');
 //         }
 
-//         // ⚠️ HubSpot и cookie — веб-специфика. В RN обычно это пропускают.
-//         // Если очень нужно — отправляй sendHSFormData без document/cookie.
+//         // ⚠️ HubSpot and cookies are web-specific. Usually skipped in RN.
+//         // If really needed, call sendHSFormData without document/cookie.
 //         // try { await sendHSFormData(...); } catch {}
 
 //         const { data } = await httpLoginSocial(freshIdToken, accessToken ?? '', 'google');
@@ -112,13 +112,13 @@
 //         return;
 //       }
 
-//       // существующий юзер
+//       // existing user
 //       const { data } = await httpLoginSocial(freshIdToken, accessToken ?? '', 'google');
 //       await actionAfterLogin(data);
 //       navigateToUserPage(router, config?.afterLoginPage);
 //     })().catch((e) => {
 //       console.error('Google sign-in failed:', e);
-//       // здесь можно показать toast/snackbar
+//       // a toast/snackbar could be shown here
 //     });
 //   }, [response]);
 

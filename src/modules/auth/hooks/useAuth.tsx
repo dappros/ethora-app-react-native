@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/src/store";
 import { useCallback } from "react";
+import { logoutService } from "@ethora/chat-component-rn";
 import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
   authCheckRequest,
@@ -37,8 +38,11 @@ export const useAuth = (): UseAuthReturn => {
     return dispatch(authCheckRequest()).unwrap();
   }, [dispatch]);
 
-  const logout = useCallback(() => {
-    return dispatch(authSlice.actions.authLogout());
+  // Full chat teardown first (XMPP, component store and AsyncStorage), then reset auth.
+  // performLogout never throws — it logs errors itself.
+  const logout = useCallback(async () => {
+    await logoutService.performLogout();
+    dispatch(authSlice.actions.authLogout());
   }, [dispatch]);
 
   const refresh = useCallback(() => {

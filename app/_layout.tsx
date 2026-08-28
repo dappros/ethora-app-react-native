@@ -7,6 +7,7 @@ import { useAuth } from '@/src/modules/auth/hooks';
 import { useConfig } from '@/src/modules/config/hooks';
 import { tokenStorage } from '@/src/core/lib/tokenStorage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import * as Linking from 'expo-linking';
 import '../global.css';
 import { View, Text } from 'react-native';
@@ -18,20 +19,23 @@ function AuthGate() {
   const router = useRouter();
   const segments = useSegments();
   const auth = useAuth();
-  const { geConfigApp, status: configStatus } = useConfig();
+  const { geConfigApp, restoreDomain, status: configStatus } = useConfig();
 
   const [ready, setReady] = useState(false);
   const navigatedRef = useRef(false);
 
-  // Инициализация: сначала CHECK, потом CONFIG
   useEffect(() => {
     const initialize = async () => {
       try {
-        await auth.check();
-        await geConfigApp(EXPO_PUBLIC_DOMAIN_NAME);
-        setReady(true);
+        await auth.check().catch((error) => console.log('Auth check error:', error));
+
+        const savedWorkspace = await restoreDomain();
+        if (savedWorkspace) {
+          await geConfigApp(savedWorkspace);
+        }
       } catch (error) {
         console.log('Initialization error:', error);
+      } finally {
         setReady(true);
       }
     };
@@ -39,7 +43,6 @@ function AuthGate() {
     initialize();
   }, []);
 
-  // Обработка deep links для Turnstile
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
       const url = new URL(event.url);
@@ -57,7 +60,7 @@ function AuthGate() {
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
     
-    // Проверяем initial URL при запуске
+    // Check the initial URL on launch
     Linking.getInitialURL().then((url) => {
       if (url) {
         handleDeepLink({ url });
@@ -72,15 +75,19 @@ function AuthGate() {
 
     const inAuthGroup = segments[0] === '(auth)';
     const hasToken = !!auth.token;
+    const hasConfig = configStatus === 'success';
 
-    if (!hasToken && !inAuthGroup) {
+    if (!hasToken && !hasConfig) {
+      navigatedRef.current = true;
+      router.replace('/(auth)/domain');
+    } else if (!hasToken && !inAuthGroup) {
       navigatedRef.current = true;
       router.replace('/(auth)/login');
     } else if (hasToken && inAuthGroup) {
       navigatedRef.current = true;
-      router.replace('/(app)');
+      router.replace('/(app)/chat');
     }
-  }, [ready, segments, auth.token]);
+  }, [ready, segments, auth.token, configStatus]);
 
   if (!ready) {
     return (
@@ -98,7 +105,9 @@ export default function RootLayout() {
     <Provider store={store}>
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <AuthGate />
+          <KeyboardProvider>
+            <AuthGate />
+          </KeyboardProvider>
         </GestureHandlerRootView>
       </SafeAreaProvider>
     </Provider>

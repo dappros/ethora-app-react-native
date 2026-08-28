@@ -11,7 +11,7 @@ export interface UseAuthReturn {
     login: (value: AuthLoginFetchDataValue) => Promise<AuthResponse>;
     register: (value: AuthRegistrationFetchDataValue) => Promise<AuthResponse>;
     check: () => Promise<AuthResponse>;
-    logout: () => void;
+    logout: () => Promise<void>;
     refresh: () => Promise<AuthRefreshResponse>;
     eventToken: string;
   }

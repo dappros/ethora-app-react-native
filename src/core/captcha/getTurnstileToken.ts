@@ -14,7 +14,7 @@ export async function getTurnstileToken(): Promise<string> {
     console.log('WebBrowser result:', result);
     
     if (result.type === 'success' && result.url) {
-      // Парсим токен из URL используя expo-linking
+      // Parse the token from the URL using expo-linking
       const parsed = Linking.parse(result.url);
       const token = parsed.queryParams?.token as string | undefined;
       const error = parsed.queryParams?.error as string | undefined;
