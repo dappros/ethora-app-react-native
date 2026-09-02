@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/src/store";
 import { useCallback } from "react";
 import { logoutService } from "@ethora/chat-component-rn";
+import { dropPushRegistration } from "@modules/push";
 import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
   authCheckRequest,
@@ -38,9 +39,11 @@ export const useAuth = (): UseAuthReturn => {
     return dispatch(authCheckRequest()).unwrap();
   }, [dispatch]);
 
-  // Full chat teardown first (XMPP, component store and AsyncStorage), then reset auth.
-  // performLogout never throws — it logs errors itself.
+  // Unregister the push token first (the DELETE needs the still-valid auth token),
+  // then full chat teardown (XMPP, component store and AsyncStorage), then reset auth.
+  // dropPushRegistration and performLogout never throw — they log errors themselves.
   const logout = useCallback(async () => {
+    await dropPushRegistration();
     await logoutService.performLogout();
     dispatch(authSlice.actions.authLogout());
   }, [dispatch]);

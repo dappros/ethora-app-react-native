@@ -28,7 +28,8 @@
           "backgroundColor": "#FFFFFF",
           "imageWidth": 200
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
@@ -42,6 +43,9 @@
       "bundleIdentifier": "com.ethora.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "aps-environment": "development"
       }
     },
     "android": {
