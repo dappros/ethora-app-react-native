@@ -103,6 +103,12 @@ export const authSlice = createSlice({
       state.token = payload.token;
       state.refreshToken = payload.refreshToken;
 
+      // The XMPP password lives ~1h and is re-minted on every refresh.
+      // Keep the user object current so a chat remount never presents a dead one.
+      if (payload.xmppPassword) {
+        state.user.xmppPassword = payload.xmppPassword;
+      }
+
       const tokensAll = {
         token: payload.token,
         refreshToken: payload.refreshToken,

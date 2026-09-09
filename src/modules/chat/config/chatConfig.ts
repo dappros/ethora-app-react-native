@@ -55,12 +55,18 @@ export const createChatConfig = ({
       refreshFunction: async () => {
         try {
           const rotated = await refresh();
-          return { accessToken: rotated.token, refreshToken: rotated.refreshToken };
+          return {
+            accessToken: rotated.token,
+            refreshToken: rotated.refreshToken,
+            xmppPassword: rotated.xmppPassword,
+            fileToken: rotated.fileToken,
+          };
         } catch {
           return null;
         }
       },
     },
+    headerLayout: { safeAreaTop: true },
     initBeforeLoad: Boolean(userLoginPayload),
     newArch: true,
     colors: {

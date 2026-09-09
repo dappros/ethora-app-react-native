@@ -56,6 +56,8 @@ export interface AuthRefreshResponse {
   refreshToken: string;
   token: string;
   wsToken: string;
+  xmppPassword?: string;
+  fileToken?: string;
 }
 
 export interface AuthRegistrationFetchDataValue {

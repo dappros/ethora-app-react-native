@@ -2,10 +2,11 @@ import React, { FC, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
-  KeyboardAvoidingView,
   Keyboard,
   Modal,
   Platform,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,6 +14,8 @@ import {
   View,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { type ImperativeRouter as Router } from 'expo-router';
@@ -58,6 +61,19 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
 
   const [visible, setVisible] = useState(isOpen);
   const [showPassword, setShowPassword] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, () => setKeyboardOpen(true));
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboardOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   const translateY = useSharedValue(H);
   const progress = useSharedValue(0);
@@ -153,26 +169,41 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
       presentationStyle="overFullScreen">
       {/* GestureHandlerRootView: gestures inside RN Modal live in a separate native window */}
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <TouchableWithoutFeedback onPress={handleClose}>
-          <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]} />
-        </TouchableWithoutFeedback>
-
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}
+        />
         <KeyboardAvoidingView
-          behavior={Platform.select({ ios: 'padding', android: undefined })}
-          style={{ flex: 1, justifyContent: 'flex-end' }}
-          keyboardVerticalOffset={Platform.select({ ios: 0, android: 20 })}>
+          behavior="padding"
+          keyboardVerticalOffset={Platform.OS === 'android' ? -insets.bottom : 0}
+          style={{ flex: 1, justifyContent: 'flex-end' }}>
+          <Pressable
+            style={styles.dismissArea}
+            onPress={keyboardOpen ? dismissKeyboard : handleClose}
+            accessibilityLabel="Close"
+          />
           <GestureDetector gesture={pan}>
-            <Animated.View style={[styles.sheet, sheetStyle]}>
-              <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                <View style={{ flex: 1 }}>
-                  <View style={styles.pullArea}>
-                    <TouchableOpacity onPress={handleClose} style={{ alignItems: 'center' }}>
-                      <Ionicons name="chevron-down" size={24} color="#E8EDF2" />
-                      <Text style={styles.backText}>Back to Sign in</Text>
-                    </TouchableOpacity>
-                  </View>
+            <Animated.View
+              style={[styles.sheet, keyboardOpen ? styles.sheetCompact : null, sheetStyle]}>
+              <View style={styles.pullArea}>
+                <TouchableOpacity onPress={handleClose} style={{ alignItems: 'center' }}>
+                  <Ionicons name="chevron-down" size={24} color="#E8EDF2" />
+                  <Text style={styles.backText}>Back to Sign in</Text>
+                </TouchableOpacity>
+              </View>
 
-                  <View style={{ flex: 1 }}>
+              <ScrollView
+                style={styles.scroll}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={[
+                  styles.sheetContent,
+                  keyboardOpen && {
+                    paddingBottom: 20 + (Platform.OS === 'android' ? insets.bottom : 0),
+                  },
+                ]}>
+                <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                  <View>
                     <Text style={[styles.title, { color: primary }]}>Hello again!</Text>
 
                     <FormTextField<Form>
@@ -230,15 +261,19 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                       <Text style={styles.primaryBtnText}>Log in</Text>
                     </TouchableOpacity>
 
-                    <Text style={[styles.or, { color: primary }]}>or</Text>
-                    <GoogleSignInButton
-                      backgroundColor={primary}
-                      textColor="#fff"
-                      iconColor="#fff"
-                    />
+                    {!keyboardOpen && (
+                      <>
+                        <Text style={[styles.or, { color: primary }]}>or</Text>
+                        <GoogleSignInButton
+                          backgroundColor={primary}
+                          textColor="#fff"
+                          iconColor="#fff"
+                        />
+                      </>
+                    )}
                   </View>
-                </View>
-              </TouchableWithoutFeedback>
+                </TouchableWithoutFeedback>
+              </ScrollView>
             </Animated.View>
           </GestureDetector>
         </KeyboardAvoidingView>
@@ -249,9 +284,11 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
 
 const styles = StyleSheet.create({
   backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
+  dismissArea: { flex: 1 },
   sheet: {
     width: '100%',
-    height: '65%',
+    height: H * 0.65,
+    maxHeight: '100%',
     backgroundColor: '#fff',
     borderTopLeftRadius: 80,
     borderTopRightRadius: 80,
@@ -263,10 +300,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 30,
   },
+  sheetCompact: { height: undefined },
+  scroll: { flexGrow: 0, flexShrink: 1 },
+  sheetContent: { paddingBottom: 24 },
   pullArea: {
     position: 'absolute',
-    top: -110,
-    width: '100%',
+    top: -84,
+    left: 0,
+    right: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },

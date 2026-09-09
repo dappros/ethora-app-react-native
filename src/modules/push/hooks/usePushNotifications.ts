@@ -1,28 +1,25 @@
 import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { syncPushRegistration } from '@modules/push/service/pushService';
 
-// Foreground policy: while the app is open the XMPP socket is live and the
-// chat SDK shows its own in-app notifications (config.inAppNotifications),
-// so an OS banner for the same message would be a duplicate. Suppress it.
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: false,
-    shouldShowList: false,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async () => {
+    const show = AppState.currentState !== 'active';
+    return {
+      shouldShowBanner: show,
+      shouldShowList: show,
+      shouldPlaySound: show,
+      shouldSetBadge: false,
+    };
+  },
 });
 
-const extractRoomJid = (response: Notifications.NotificationResponse): string | null => {
-  const data = (response.notification.request.content.data ?? {}) as Record<string, unknown>;
-  const jid = data.jid || data.chatJid || data.roomJid;
-  return typeof jid === 'string' && jid ? jid : null;
-};
+const payloadOf = (response: Notifications.NotificationResponse): Record<string, unknown> =>
+  (response.notification.request.content.data ?? {}) as Record<string, unknown>;
 
 /**
  * Host-side push lifecycle. Mounted once in the authorized layout:
@@ -59,14 +56,10 @@ export const usePushNotifications = (): void => {
     Notifications.setNotificationChannelAsync('messages', {
       name: 'Messages',
       importance: Notifications.AndroidImportance.HIGH,
-      sound: 'default',
       vibrationPattern: [0, 250, 250, 250],
     }).catch(() => {});
   }, []);
 
-  // Notification taps. For now we land on the chat screen; opening the exact
-  // room needs the SDK to expose its pendingNotificationJid entry point
-  // (tracked as a follow-up in @ethora/chat-component-rn).
   const handledResponseRef = useRef<string | null>(null);
   useEffect(() => {
     const handle = (response: Notifications.NotificationResponse) => {
@@ -74,8 +67,8 @@ export const usePushNotifications = (): void => {
       if (handledResponseRef.current === id) return;
       handledResponseRef.current = id;
 
-      const roomJid = extractRoomJid(response);
-      console.log('[push] notification tap', roomJid ?? '(no room jid)');
+      const data = payloadOf(response);
+      console.log('[push] notification tap', data.jid ?? '(no room jid)');
       router.replace('/(app)/chat');
     };
 

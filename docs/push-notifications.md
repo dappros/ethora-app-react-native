@@ -4,7 +4,9 @@ This document describes how push notifications work in the Ethora mobile app (th
 why this particular scheme was chosen, what is already implemented on the app side, and what has to be
 implemented on the backend and the push gateway.
 
-Date: 2026-09-01. Status: client side (token registration) implemented; backend/gateway — specification.
+Date: 2026-09-07. Status: client side (token registration) implemented against the backend's final
+contract (§6). Phase 1 = our store build on our own domains with our own keys; the per-tenant admin UI
+(§6a) is phase 2.
 
 ---
 
@@ -150,31 +152,41 @@ Customers' host apps that embed the component must implement the same.
 
 ## 6. API contract (domain backend)
 
-### Token registration
+### Token registration (final backend contract, 2026-09-07)
 
 ```
 POST https://api.<domain>/v1/push/subscription/{appId}
 Authorization: Bearer <access token>
 {
   "registrationToken": "<APNs hex | FCM token>",
-  "deviceType": "ios" | "android",
-  "tokenType": "apns" | "fcm",          // new: raw APNs vs FCM
-  "bundleId": "com.ethora.app",          // new: sender credentials lookup
-  "env": "development" | "production"    // new: sandbox vs production APNs host
+  "deviceType": "ios" | "android" | "web",
+  "tokenType": "apns" | "fcm" | "apns-voip",   // default fcm; iOS native -> apns; PushKit -> apns-voip (later)
+  "buildOrigin": "platform" | "tenant"         // default tenant; our store build -> platform
 }
 ```
 
 `registrationToken` + `deviceType` is the contract the web SDK already uses (`deviceType: 'web'`).
-The remaining fields are an extension; the backend must **store** them next to the token. Re-registering
-the same token is idempotent (upsert by `registrationToken`).
+Both new fields have server-side defaults (`fcm` / `tenant`), so old clients keep working.
+The earlier draft fields `bundleId` / `env` were dropped: the backend resolves the sender credentials
+from `buildOrigin` (platform keys vs the app owner's keys) instead of from the bundle id.
+
+The app decides `buildOrigin` from `app.json → expo.extra.push.buildOrigin` (`platform` in this repo;
+a white-label fork sets `tenant`). `tokenType` follows the OS: iOS → `apns`, Android → `fcm`.
+
+Open question for the backend: a dev-client / debug build gets a **sandbox** APNs token, TestFlight /
+App Store a production one; the platform sender has to pick the matching APNs host. Until this is
+answered, test iOS pushes on whichever environment the platform key is configured for.
 
 ### Token removal
 
 ```
-DELETE https://api.<domain>/v1/users/endpoints
+DELETE https://api.<domain>/v1/push/subscription/{appId}
 Authorization: Bearer <access token>
-{ "endpoint": "<registrationToken>" }
+{ "registrationToken": "<registrationToken>" }
 ```
+
+Verified on chat-qa (`{"ok":true,"deletedCount":1}`). Backends without the Push update answer 404; the
+app then falls back to the legacy `DELETE /v1/users/endpoints { "endpoint": "<registrationToken>" }`.
 
 ### Sending (inside the backend)
 
@@ -197,8 +209,26 @@ data: { jid: "<room JID>", msgID: "...", senderName: "...", ... }
 `data.jid` / `data.msgID`, see `notificationPolicy.ts`). For Android, set
 `android.notification.channelId: "messages"`.
 
-Backend configuration: `PUSH_GATEWAY_URL`, `PUSH_GATEWAY_KEY` (tenant key). Admin panel: key upload
-**per bundleId**, instead of one pair per app as today (`firebaseServiceAccountUploaded`, `apnsKeyUploaded`).
+### 6a. Admin panel (`ethora-app-reactjs`) — backend contract for the owner UI
+
+The backend implemented the gateway idea (§3, §7) internally: instead of a separate service, the app
+owner either uploads their own keys or switches on **platform delivery** (sending through Ethora's keys
+to Ethora's store build, with a daily quota).
+
+Credentials (two independent sections):
+
+- Apple Push — `POST /v1/push/apns/:appId`, multipart, file in field `apnsKey`; all fields required:
+  `keyId` (10 chars), `teamId` (10 chars), `environment` (`sandbox` | `production`), `bundleId`.
+  Validation errors → `422` with text in `error`, shown as is. Delete — `DELETE /v1/push/apns/:appId`.
+- Android + Web Push — Firebase service account, as before, separate section.
+
+Platform delivery toggle (for apps used through our universal store build rather than a custom one):
+
+- `GET /v1/push/platform/:appId` → `{ enabled, todayCount, quota }` — state + "used X of Y today".
+- `PUT /v1/push/platform/:appId` body `{ "enabled": true | false }`; default `false`;
+  hint: "enable if you do not publish your own app".
+
+Swagger, tag **Push**, is updated and can be exercised against QA directly.
 
 ## 7. Gateway (`push.ethora.com`) — specification
 
@@ -255,11 +285,31 @@ through us.
 App:
 
 - [x] Module `src/modules/push/`, wiring in layout and logout, `app.json` (plugin + entitlement).
-- [ ] Put `google-services.json` (package `com.ethora.app`) in the repo root and add to `app.json`:
-      `"android": { "googleServicesFile": "./google-services.json" }`. Without the file `expo prebuild`
-      fails, so the line is not added yet.
-- [ ] `npx expo prebuild` + rebuild the dev client (`npm run ios` / `npm run android`).
-- [ ] Check the log for `[push] registered apns|fcm token on <domain>`.
+- [x] Payload matches the final contract (`tokenType` + `buildOrigin`), `buildOrigin` from
+      `app.json → extra.push.buildOrigin` (= `platform`).
+- [x] `app.json → android.googleServicesFile = ./google-services.json` added.
+- [x] Android package changed to **`com.ethora`** (2026-09-07) because that Android client already
+      exists in Firebase project `ethora-668e9` (sender `972933470054`); nothing is published in the
+      stores yet, so identifiers are free to change. `google-services.json` from that client is in
+      the repo root; `android/` regenerated with `expo prebuild --platform android --clean`.
+      iOS bundle id stays `com.ethora.app`: APNs does not need Firebase, and the Team-scoped `.p8`
+      covers any bundle id of the team. Local testing only: Android emulator (Google Play image) and
+      a physical iPhone via Xcode.
+- [ ] Android emulator must be a **Google Play** system image (FCM needs Play services).
+- [ ] Apple Developer → Identifiers → `com.ethora.app` → capability **Push Notifications** enabled
+      (the `aps-environment` entitlement in `app.json` needs it at signing time).
+- [ ] `npx expo prebuild` + rebuild the dev client (`npm run ios` / `npm run android`); iOS on a
+      physical device only.
+- [x] **Android verified end-to-end on production, 2026-09-07**: emulator (Pixel 9 Pro, Play image),
+      `[push] registered fcm token (platform, legacy contract) on chat.ethora.com`, messages sent
+      from the web arrived as OS notifications with the app in background, tap opened the app and
+      the handler logged the room jid from `data.jid`. Prerequisite that was missing: the Firebase
+      service account of `ethora-668e9` uploaded for app `app` on production (admin panel,
+      `firebaseServiceAccountUploaded`) — without it the legacy backend answers `422 Project not found`.
+- [ ] iOS on a physical iPhone: blocked until the new backend (raw APNs tokens) is on production.
+- [ ] For every app you test against: `PUT /v1/push/platform/{appId} {"enabled": true}` (default is
+      off, so without it the backend has nothing to send our build with). Phase 2 puts this toggle in
+      the admin panel.
 
 Keys (manual):
 
@@ -271,18 +321,41 @@ Keys (manual):
 
 Backend:
 
-- [ ] Store `tokenType`, `bundleId`, `env` in `/push/subscription/{appId}`.
-- [ ] Direct `apns` sending over APNs (currently everything goes through Firebase), honouring `env`.
-- [ ] Keys per `bundleId` in the admin panel; gateway fallback.
-- [ ] `data.jid` in the payload; `channelId: "messages"` for Android.
-- [ ] Gateway (§7) deployed at `push.ethora.com`.
+- [x] `tokenType` + `buildOrigin` stored in `/push/subscription/{appId}` (done by the backend team).
+- [x] Platform keys (our `.p8`, our Firebase service account) on the backend; platform-delivery
+      toggle + quota per app.
+- [ ] Confirm: sandbox vs production APNs host selection for platform tokens (see §6).
+- [x] Unregister moved to `DELETE /v1/push/subscription/{appId}` (legacy route kept as 404 fallback).
+- [ ] `data.jid` in the message payload; `channelId: "messages"` for Android.
+
+Admin panel (`ethora-app-reactjs`, done 2026-09-07/08, Mobile App tab → Push Notifications): platform-delivery
+toggle with "Used X of Y today" (verified on QA), Apple Push form (`.p8` + keyId/teamId/environment/bundleId,
+422 text shown verbatim, delete with confirm), Firebase section as before under its own heading.
+Open on the backend side: pushes on QA are not sent at all — see `push-qa-report-2026-09-07.md`.
 
 ## 10. Not implemented / next steps
 
+0. **Division of labour with `@ethora/chat-component-rn`** (decided 2026-09-07). The host app owns
+   everything bound to the binary: permission, native token, `google-services.json`, entitlements,
+   Android channels, PushKit/CallKit, background handlers, and the registration call (only the host
+   knows `buildOrigin`). The SDK owns what is bound to the chat: mucsub (so ejabberd knows whom to
+   push), turning a payload into an action (`handleCallPush` for calls, `setPendingNotificationJid`
+   for messages), in-app notifications. The SDK's current push code (`hooks/usePushNotifications.ts`,
+   `services/pushNotifications.ts`, `PushNotificationProvider`) is dead: unmounted, imports
+   `@react-native-firebase/messaging` which is not a dependency, targets the legacy
+   `push.<domain>/api/v1/subscriptions`. To do in the SDK: export `handlePushPayload(data)` (calls →
+   `handleCallPush`, messages → `setPendingNotificationJid`), optionally a `registerPushSubscription()`
+   helper, remove the dead code, document the host's part in the README. No credentials or Firebase
+   files ever live in the npm package — they belong to whichever build is published.
+0a. **SDK 26.7.5 (commit `0c097cf` in `ethora-chat-component-rn`, 2026-09-08) — required for pushes.**
+   The `initBeforeLoad` bootstrap never sent the MucSub subscription, so users who only signed in through
+   the RN app were unknown to ejabberd as push recipients ("no MucSub subscription"). Fixed together with a
+   `presenceInRoom` timeout race. Verified on `example.chat-qa.ethora.com`: with the fixed SDK the push
+   arrives with the app process killed. Until 26.7.5 is published, the app's `node_modules` carries a local
+   build of the SDK; bump `@ethora/chat-component-rn` to 26.7.5 in `package.json` after `npm publish`.
 1. **Opening the exact room on tap.** The SDK keeps `pendingNotificationJid` in its internal store and
-   does not export the setter. Today a tap lands on the chat screen and the `jid` is logged. Needs an
-   export in `@ethora/chat-component-rn` (repository `ethora-chat-component-rn`), then one line in
-   `usePushNotifications.ts`.
+   does not export the setter. Today a tap lands on the chat screen and the `jid` is logged. Needs the
+   `handlePushPayload` export above, then one line in `usePushNotifications.ts`.
 2. **Calls, Android in background.** The SDK accepts an incoming call from a data push
    (`helpers/callPush.ts`, `handleCallPush`): it needs `type: "call"`, `callId`, `callToken` (LiveKit
    token — without it the SDK does not ring), `callRoom`/`jid`, `callerName`, `kind`. On the host: a
@@ -298,7 +371,32 @@ Backend:
    26.7.2 does not support this (see `useCallKeep.ts`).
 4. **Web SDK** uses the same endpoint with `deviceType: 'web'` — the backend changes are backward compatible.
 
+## 10a. Observed production payload (old backend, Android)
+
+- `notification.title` is empty (the shade shows only the app name), `notification.body` = message text.
+- No `channelId`: Android files it under `fcm_fallback_notification_channel`, silent, no vibration.
+  Our `messages` channel is created but unused until the backend sets `android.notification.channelId`.
+- `data.jid` is present (`<appId>_<roomId>@conference.xmpp.<domain>`) — enough to open the room once
+  the SDK exports its entry point (§10.1).
+- After returning from background the SDK logs `Error sending getRooms request: Cannot read property
+  'write' of null` (a request fired before the XMPP socket reconnected) and the host shows an empty red
+  error toast — both cosmetic here, worth fixing in the SDK / toast separately.
+
 ## 11. Known pitfalls
+
+- **Production backend (`api.chat.ethora.com`) is still on the old contract** (checked 2026-09-07):
+  no `/v1/push/platform`, and `/v1/push/subscription` answers `422 "tokenType" is not allowed`.
+  The new endpoints are only on `chat-qa.ethora.com`. The app therefore falls back to the legacy
+  body (`registrationToken` + `deviceType`) on such a 422 (`registerWithFallback` in
+  `pushService.ts`); the log line then says `legacy contract`. On the old backend Android pushes go
+  through Firebase with the app owner's uploaded service account; raw APNs tokens (iOS) are not
+  supported there until the backend update is deployed to production.
+- **Android emulator**: needs a Google Play image; if DNS does not resolve inside the emulator
+  (`ping api...` → unknown host while `ping 8.8.8.8` works) start it with
+  `emulator -avd <name> -dns-server 8.8.8.8,1.1.1.1`.
+- **Unrelated app bug seen while testing**: on Android, tapping "Continue" on the workspace screen
+  while the keyboard is open crashes with a Fabric `addViewAt ... child already has a parent`
+  error; submitting with the keyboard's Enter key works. To be fixed separately.
 
 - **Sandbox vs production APNs.** A dev client gets a sandbox token, TestFlight/App Store — production.
   The token itself does not reveal which; pushing to the wrong host fails silently with `BadDeviceToken`.

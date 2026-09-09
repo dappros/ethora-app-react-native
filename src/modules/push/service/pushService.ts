@@ -1,8 +1,12 @@
-import * as Application from 'expo-application';
-import { registerPushToken, unregisterPushToken } from '@modules/push/fetch';
+import Constants from 'expo-constants';
+import {
+  registerPushToken,
+  unregisterPushToken,
+  unregisterPushTokenLegacy,
+} from '@modules/push/fetch';
 import { pushStorage } from '@modules/push/lib/pushStorage';
 import { ensurePushPermission, getNativePushToken } from '@modules/push/service/pushToken';
-import { PushEnv, PushRegistrationRecord } from '@modules/push/types';
+import { PushBuildOrigin, PushRegistrationRecord, RegisterPushTokenPayload } from '@modules/push/types';
 
 export interface PushTarget {
   /** API domain (cluster) currently in use, e.g. `chat.ethora.com`. */
@@ -13,10 +17,8 @@ export interface PushTarget {
   userId: string;
 }
 
-// Debug/dev-client builds get sandbox APNs tokens, TestFlight/App Store get
-// production ones. The sender must pick the matching APNs host, so tell it
-// which build this token came from. Android doesn't care.
-const buildEnv = (): PushEnv => (__DEV__ ? 'development' : 'production');
+const buildOrigin = (): PushBuildOrigin =>
+  Constants.expoConfig?.extra?.push?.buildOrigin === 'tenant' ? 'tenant' : 'platform';
 
 const sameRegistration = (record: PushRegistrationRecord | null, next: PushRegistrationRecord) =>
   !!record &&
@@ -26,6 +28,39 @@ const sameRegistration = (record: PushRegistrationRecord | null, next: PushRegis
   record.userId === next.userId;
 
 let inFlight: Promise<void> | null = null;
+
+const unregister = async (record: PushRegistrationRecord): Promise<void> => {
+  try {
+    await unregisterPushToken(record.domain, record.appId, record.registrationToken);
+  } catch (error) {
+    const status = (error as { response?: { status?: number } })?.response?.status;
+    if (status !== 404) throw error;
+    await unregisterPushTokenLegacy(record.domain, record.registrationToken);
+  }
+};
+
+const isUnknownFieldError = (error: unknown): boolean => {
+  const response = (error as { response?: { status?: number; data?: { error?: string } } })
+    ?.response;
+  return response?.status === 422 && /not allowed/i.test(String(response.data?.error ?? ''));
+};
+
+const registerWithFallback = async (
+  target: PushTarget,
+  payload: RegisterPushTokenPayload
+): Promise<'new' | 'legacy'> => {
+  try {
+    await registerPushToken(target.domain, target.appId, payload);
+    return 'new';
+  } catch (error) {
+    if (!isUnknownFieldError(error)) throw error;
+    await registerPushToken(target.domain, target.appId, {
+      registrationToken: payload.registrationToken,
+      deviceType: payload.deviceType,
+    });
+    return 'legacy';
+  }
+};
 
 /**
  * Bring the backend registration in line with the current (domain, app, user,
@@ -52,24 +87,24 @@ export const syncPushRegistration = async (target: PushTarget): Promise<void> =>
       const current = await pushStorage.get();
       if (sameRegistration(current, next)) return;
 
-      // A stale registration (other domain / user / rotated token) would keep
-      // receiving pushes — best effort to remove it first. May 401 when the
-      // stored domain is no longer the one our auth token belongs to.
-      if (current) {
-        await unregisterPushToken(current.domain, current.registrationToken).catch(() => {});
-      }
 
-      await registerPushToken(target.domain, target.appId, {
+      const contract = await registerWithFallback(target, {
         registrationToken: native.token,
         deviceType: native.deviceType,
         tokenType: native.tokenType,
-        bundleId: Application.applicationId ?? '',
-        env: buildEnv(),
+        buildOrigin: buildOrigin(),
       });
       await pushStorage.set(next);
-      console.log(`[push] registered ${native.tokenType} token on ${target.domain}`);
+      console.log(
+        `[push] registered ${native.tokenType} token (${buildOrigin()}, ${contract} contract) on ${target.domain}`
+      );
     } catch (error) {
-      console.warn('[push] registration failed; will retry on next app start / login.', error);
+      const response = (error as { response?: { status?: number; data?: unknown } })?.response;
+      console.warn(
+        '[push] registration failed; will retry on next app start / login.',
+        response?.status ?? '',
+        response?.data ? JSON.stringify(response.data) : error
+      );
     } finally {
       inFlight = null;
     }
@@ -86,7 +121,7 @@ export const dropPushRegistration = async (): Promise<void> => {
   try {
     const record = await pushStorage.get();
     if (!record) return;
-    await unregisterPushToken(record.domain, record.registrationToken).catch(() => {});
+    await unregister(record).catch(() => {});
     await pushStorage.clear();
   } catch {
     // never block logout on push cleanup

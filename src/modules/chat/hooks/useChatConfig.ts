@@ -16,6 +16,10 @@ export const useChatConfig = (): ChatConfig => {
     dispatch(authSlice.actions.authLogout());
   }, [dispatch]);
 
+  const userId = user?._id;
+  const xmppUsername = user?.xmppUsername;
+  const hasXmppPassword = Boolean(user?.xmppPassword);
+
   return useMemo(
     () =>
       createChatConfig({
@@ -26,6 +30,7 @@ export const useChatConfig = (): ChatConfig => {
         refresh,
         onAfterLogout,
       }),
-    [configApp, domain, onAfterLogout, user?._id, user?.xmppUsername, user?.xmppPassword, token, refreshToken, refresh]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [configApp, domain, onAfterLogout, userId, xmppUsername, hasXmppPassword, refresh]
   );
 };

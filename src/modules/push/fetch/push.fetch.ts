@@ -15,12 +15,14 @@ export const registerPushToken = (
   payload: RegisterPushTokenPayload
 ) => $api.post(`/push/subscription/${appId}`, payload, { baseURL: apiBaseUrl(domain) });
 
-/**
- * DELETE https://api.[domain]/v1/users/endpoints — removes the device token.
- * Must be sent to the domain the token was registered on (which after a
- * workspace switch is not the current one), hence the explicit baseURL.
- */
-export const unregisterPushToken = (domain: string, registrationToken: string) =>
+
+export const unregisterPushToken = (domain: string, appId: string, registrationToken: string) =>
+  $api.delete(`/push/subscription/${appId}`, {
+    baseURL: apiBaseUrl(domain),
+    data: { registrationToken },
+  });
+
+export const unregisterPushTokenLegacy = (domain: string, registrationToken: string) =>
   $api.delete('/users/endpoints', {
     baseURL: apiBaseUrl(domain),
     data: { endpoint: registrationToken },

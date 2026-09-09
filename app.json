@@ -29,7 +29,7 @@
           "imageWidth": 200
         }
       ],
-      "expo-notifications"
+      ["expo-notifications", { "defaultChannel": "messages" }]
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
@@ -53,9 +53,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.ethora.app"
+      "package": "com.ethora",
+      "googleServicesFile": "./google-services.json"
     },
     "extra": {
+      "push": {
+        "buildOrigin": "platform"
+      },
       "eas": {
         "projectId": "b79aedc2-ad0f-40ed-b8bd-4b54010d9f0f"
       }

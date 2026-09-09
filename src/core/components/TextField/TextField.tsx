@@ -8,6 +8,7 @@ import {
   Pressable,
   ViewStyle,
   TextStyle,
+  Platform,
 } from 'react-native';
 
 export type TextFieldProps = Omit<TextInputProps, 'style' | 'onChange'> & {
@@ -111,6 +112,9 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#111827',
     fontSize: 16,
+    ...Platform.select({
+      android: { paddingVertical: 0, includeFontPadding: false, textAlignVertical: 'center' },
+    }),
   },
   left: { marginRight: 10, color: '#0052CD' },
   right: { marginLeft: 10, color: '#8F8F8F' },

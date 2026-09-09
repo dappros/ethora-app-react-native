@@ -34,9 +34,10 @@ export default function Domain() {
 
   const loadConfig = async (target: Workspace) => {
     setError(null);
+    Keyboard.dismiss();
     try {
       await geConfigApp(target);
-      router.replace('/(auth)/login');
+      requestAnimationFrame(() => router.replace('/(auth)/login'));
     } catch (e) {
       setError('Could not load config for this workspace. Please check the address and try again.');
     }
@@ -51,8 +52,9 @@ export default function Domain() {
   };
   const onBaseApp = () => setBaseAppConfirmOpen(true);
   const onBaseAppConfirm = async () => {
-    await loadConfig({ domainName: DEFAULT_DOMAIN_NAME, domain: DEFAULT_API_DOMAIN });
+    // Close the modal first for the same reason as the keyboard above.
     setBaseAppConfirmOpen(false);
+    await loadConfig({ domainName: DEFAULT_DOMAIN_NAME, domain: DEFAULT_API_DOMAIN });
   };
 
   return (
