@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
+import { handlePushPayload } from '@ethora/chat-component-rn';
 import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { syncPushRegistration } from '@modules/push/service/pushService';
@@ -68,14 +69,23 @@ export const usePushNotifications = (): void => {
       handledResponseRef.current = id;
 
       const data = payloadOf(response);
-      console.log('[push] notification tap', data.jid ?? '(no room jid)');
+      const outcome = handlePushPayload(data);
+      console.log('[push] notification tap →', outcome, data.jid ?? '');
       router.replace('/(app)/chat');
     };
 
-    // Cold start: the tap that launched the app.
-    Notifications.getLastNotificationResponseAsync()
-      .then((response) => response && handle(response))
-      .catch(() => {});
+    // Cold start: the tap that launched the app. Read from the native cache
+    // synchronously — it survives a JS restart (dev-client reload, a second
+    // bundle load right after the tap) that the async variant lost.
+    try {
+      const last = Notifications.getLastNotificationResponse();
+      if (last) {
+        handle(last);
+        // One tap = one open: the native side otherwise keeps replaying this
+        // response to every later mount.
+        Notifications.clearLastNotificationResponse();
+      }
+    } catch {}
 
     const sub = Notifications.addNotificationResponseReceivedListener(handle);
     return () => sub.remove();

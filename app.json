@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ethora-app",
+    "name": "Ethora",
     "slug": "ethora-app",
     "version": "1.0.0",
     "web": {
@@ -29,7 +29,14 @@
           "imageWidth": 200
         }
       ],
-      ["expo-notifications", { "defaultChannel": "messages" }]
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "messages",
+          "icon": "./assets/notification-icon.png",
+          "color": "#0052CD"
+        }
+      ]
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
@@ -51,7 +58,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#7740CA"
       },
       "package": "com.ethora",
       "googleServicesFile": "./google-services.json"

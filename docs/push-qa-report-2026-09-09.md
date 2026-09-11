@@ -55,6 +55,7 @@ to the room, **no push**.
 | 13:33:3x | «legacy reg test» (token re-registered in the old body format) | echoed, no push |
 | 13:50:05 | «clean run» (state rebuilt from scratch, see above) | echoed, no push |
 | 13:51:03 | «with data push» (SDK-shaped stanza: `<data … push="true"/>` + `<body/>`) | echoed, no push |
+| 14:40 | «web push test 14:35» sent from the **web app** (`example.chat-qa.ethora.com`, user dmytrotest) | in the room, web shows the receiver offline ("2 users · 1 online"), no push |
 
 The last send uses the exact stanza the SDK / web component sends, including the `data` element with
 `push="true"`; earlier sends were plain `<body/>`-only messages.
@@ -62,6 +63,9 @@ The last send uses the exact stanza the SDK / web component sends, including the
 `todayCount` for this app is **2** throughout and never changes (those 2 are manual
 `POST /v1/push/user` calls in the morning). So the push service made **no send attempt** for any of
 these messages.
+
+The device token the app registered (`cmLy-F_wTlG1H62Zfqfy…`) is the one currently held by Firebase on the
+device; a direct FCM HTTP v1 send to it at 14:42 woke the killed process and showed the notification.
 
 No FCM activity on the device for these sends (logcat `FirebaseMessaging` / `FCM-Notification` = 0).
 
