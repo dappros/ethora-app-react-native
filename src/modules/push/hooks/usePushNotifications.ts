@@ -19,8 +19,17 @@ Notifications.setNotificationHandler({
   },
 });
 
-const payloadOf = (response: Notifications.NotificationResponse): Record<string, unknown> =>
-  (response.notification.request.content.data ?? {}) as Record<string, unknown>;
+const payloadOf = (response: Notifications.NotificationResponse): Record<string, unknown> => {
+  const request = response.notification.request;
+  const data = (request.content.data ?? {}) as Record<string, unknown>;
+  const trigger = request.trigger as { type?: string; payload?: unknown } | null;
+  const raw =
+    trigger?.type === 'push' && trigger.payload && typeof trigger.payload === 'object'
+      ? (trigger.payload as Record<string, unknown>)
+      : {};
+  const body = raw.body && typeof raw.body === 'object' ? (raw.body as Record<string, unknown>) : {};
+  return { ...raw, ...body, ...data };
+};
 
 /**
  * Host-side push lifecycle. Mounted once in the authorized layout:
