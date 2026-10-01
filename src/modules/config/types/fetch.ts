@@ -33,6 +33,16 @@ export interface ModelAIbot {
     }
   }
 
+export interface FirebaseWebConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId: string;
+}
+
 export interface ModelAppDefaulRooom {
   jid: string;
   pinned: boolean;
@@ -64,15 +74,10 @@ export interface ModelApp {
     /** XMPP host of the app cluster, e.g. xmpp.chat-qa.ethora.com */
     xmppHost?: string;
     firebaseWebConfigString?: string;
-    firebaseConfigParsed?: {
-      apiKey: string;
-      authDomain: string;
-      projectId: string;
-      storageBucket: string;
-      messagingSenderId: string;
-      appId: string;
-      measurementId: string;
-    };
+    /** Parsed from firebaseWebConfigString in the config slice (see utils/firebaseConfig.ts) */
+    firebaseConfigParsed?: FirebaseWebConfig | null;
+    /** Absent on apps created before the backend gained this field = registration allowed */
+    userRegistrationDisabled?: boolean;
     stats: {
       recentlyApiCalls: number;
       recentlyFiles: number;

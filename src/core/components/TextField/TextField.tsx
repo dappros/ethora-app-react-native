@@ -10,6 +10,7 @@ import {
   TextStyle,
   Platform,
 } from 'react-native';
+import { useAppColors } from '@/src/core/theme';
 
 export type TextFieldProps = Omit<TextInputProps, 'style' | 'onChange'> & {
   label?: string;
@@ -34,25 +35,30 @@ export const TextField: React.FC<TextFieldProps> = ({
   containerStyle,
   inputStyle,
   editable = true,
-  accentColor = '#0052CD',
+  accentColor,
   ...inputProps
 }) => {
   const [focused, setFocused] = useState(false);
+  const colors = useAppColors();
+  const accent = accentColor ?? colors.primary;
 
   const borderColor = useMemo(() => {
-    if (error) return '#B91C1C';
-    if (focused) return accentColor;
+    if (error) return colors.error;
+    if (focused) return accent;
     return 'transparent';
-  }, [error, focused, accentColor]);
+  }, [error, focused, accent, colors.error]);
 
   return (
     <View style={containerStyle}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? <Text style={[styles.label, { color: colors.text }]}>{label}</Text> : null}
 
       <View
         style={[
           styles.wrap,
-          { borderColor, backgroundColor: focused ? '#fff' : '#E8EDF2' },
+          {
+            borderColor,
+            backgroundColor: focused ? colors.inputBackgroundFocused : colors.inputBackground,
+          },
           !editable && { opacity: 0.6 },
         ]}
       >
@@ -61,8 +67,8 @@ export const TextField: React.FC<TextFieldProps> = ({
         <TextInput
           {...inputProps}
           editable={editable}
-          style={[styles.input, inputStyle]}
-          placeholderTextColor="#8F8F8F"
+          style={[styles.input, { color: colors.inputText }, inputStyle]}
+          placeholderTextColor={colors.placeholder}
           onFocus={(e) => {
             setFocused(true);
             inputProps.onFocus?.(e);
@@ -86,9 +92,9 @@ export const TextField: React.FC<TextFieldProps> = ({
       </View>
 
       {!!error ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
       ) : hint ? (
-        <Text style={styles.hint}>{hint}</Text>
+        <Text style={[styles.hint, { color: colors.textSecondary }]}>{hint}</Text>
       ) : null}
     </View>
   );
@@ -116,8 +122,9 @@ const styles = StyleSheet.create({
       android: { paddingVertical: 0, includeFontPadding: false, textAlignVertical: 'center' },
     }),
   },
-  left: { marginRight: 10, color: '#0052CD' },
-  right: { marginLeft: 10, color: '#8F8F8F' },
+  // Fixed-width slots: icons of different glyph widths keep the text aligned across fields
+  left: { width: 22, alignItems: 'center', marginRight: 10 },
+  right: { width: 22, alignItems: 'center', marginLeft: 10 },
   error: {
     color: '#B91C1C',
     marginTop: 6,

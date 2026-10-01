@@ -13,6 +13,7 @@ export interface UseConfigReturn {
 }
 
 export interface AppBrandingTheme {
+  dark: boolean;
   background: string;
   text: string;
   primary: string;

@@ -20,6 +20,7 @@ export default function Login() {
   const { resetConfig } = useConfig();
   const { isBaseApp, displayName, logoSource, theme } = useAppBranding();
   const router = useRouter();
+  const showBrandBackground = isBaseApp;
 
   const [defaultLoginOpen, setDefaultLoginOpen] = useState(false);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
@@ -36,10 +37,10 @@ export default function Login() {
 
   return (
     <ImageBackground
-      // Base app — Ethora branded background, custom domain — white background
-      source={isBaseApp ? loginScreenBackgroundImage : undefined}
+      // Base app — Ethora branded background in both themes, custom domain — white / dark ground
+      source={showBrandBackground ? loginScreenBackgroundImage : undefined}
       style={{
-        backgroundColor: isBaseApp ? 'rgba(0,0,255, 0.05)' : theme.background,
+        backgroundColor: showBrandBackground ? 'rgba(0,0,255, 0.05)' : theme.background,
         width: '100%',
         height: '100%',
       }}
@@ -116,7 +117,7 @@ export default function Login() {
             <RegularLoginLabel
               setOpen={() => setDefaultLoginOpen(true)}
               textColor={theme.text}
-              linkColor={isBaseApp ? theme.text : theme.primary}
+              linkColor={showBrandBackground ? theme.text : theme.primary}
             />
 
             {/* <View className="mt-11 items-center">
@@ -132,7 +133,7 @@ export default function Login() {
         message="Are you sure you want to go back and choose another domain?"
         confirmText="Yes, go back"
         cancelText="Cancel"
-        color={isBaseApp ? undefined : theme.primary}
+        color={showBrandBackground ? undefined : theme.primary}
         onConfirm={confirmLeaveToDomain}
         onClose={() => setLeaveConfirmOpen(false)}
       />

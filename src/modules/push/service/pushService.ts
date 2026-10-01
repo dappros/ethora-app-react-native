@@ -98,6 +98,8 @@ export const syncPushRegistration = async (target: PushTarget): Promise<void> =>
       console.log(
         `[push] registered ${native.tokenType} token (${buildOrigin()}, ${contract} contract) on ${target.domain}`
       );
+      // Dev only: the raw token lets a push be sent to APNs/FCM directly, bypassing the backend
+      if (__DEV__) console.log(`[push] ${native.tokenType} token:`, native.token);
     } catch (error) {
       const response = (error as { response?: { status?: number; data?: unknown } })?.response;
       console.warn(

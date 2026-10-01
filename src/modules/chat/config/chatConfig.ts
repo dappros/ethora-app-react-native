@@ -1,6 +1,7 @@
 import { ChatConfig, ChatUserLoginUser, CreateChatConfigOptions } from '@modules/chat/types';
 import { apiBaseUrl, xmppHostFor, xmppSettingsFor } from '@modules/config/utils/workspace';
 import { DEFAULT_API_DOMAIN } from '@modules/config/constants';
+import { darkColors } from '@/src/core/theme';
 
 const DEFAULT_PRIMARY = '#0052CD';
 const SECONDARY = '#141414';
@@ -38,6 +39,7 @@ export const createChatConfig = ({
   domain,
   currentUser,
   tokens,
+  dark = false,
   refresh,
   headerAdditional,
   onAfterLogout,
@@ -72,6 +74,13 @@ export const createChatConfig = ({
     colors: {
       primary: app?.primaryColor || DEFAULT_PRIMARY,
       secondary: SECONDARY,
+    },
+    // Dark theme: `colors` is ignored by the chat in dark mode, the palette comes from darkColors.
+    // A custom app keeps its brand primary, the base app uses the palette default.
+    dark,
+    darkColors: {
+      ...darkColors,
+      primary: (app?.isBaseApp === false && app.primaryColor) || darkColors.primary,
     },
     chatHeaderSettings: {
       disableMenu: true,

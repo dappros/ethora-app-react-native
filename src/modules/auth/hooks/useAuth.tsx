@@ -1,10 +1,13 @@
 import { useAppDispatch, useAppSelector } from "@/src/store";
 import { useCallback } from "react";
 import { logoutService } from "@ethora/chat-component-rn";
-import { dropPushRegistration } from "@modules/push";
+// Service import (not the @modules/push barrel): the barrel re-exports usePushNotifications, which imports useAuth → cycle
+import { dropPushRegistration } from "@modules/push/service/pushService";
+import { signOutGoogle } from "@modules/auth/lib/googleSignIn";
 import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
   authCheckRequest,
+  authGoogleLoginRequest,
   authLoginRequest,
   authRegistrationRequest,
   authSlice,
@@ -28,6 +31,13 @@ export const useAuth = (): UseAuthReturn => {
     [dispatch]
   );
 
+  const loginWithGoogle = useCallback(
+    (value?: { utm?: string }) => {
+      return dispatch(authGoogleLoginRequest(value)).unwrap();
+    },
+    [dispatch]
+  );
+
   const register = useCallback(
     (value: AuthRegistrationFetchDataValue) => {
       return dispatch(authRegistrationRequest(value)).unwrap();
@@ -44,6 +54,7 @@ export const useAuth = (): UseAuthReturn => {
   // dropPushRegistration and performLogout never throw — they log errors themselves.
   const logout = useCallback(async () => {
     await dropPushRegistration();
+    await signOutGoogle();
     await logoutService.performLogout();
     dispatch(authSlice.actions.authLogout());
   }, [dispatch]);
@@ -60,6 +71,7 @@ export const useAuth = (): UseAuthReturn => {
     checked,
     rememberMe,
     login,
+    loginWithGoogle,
     register,
     check,
     logout,

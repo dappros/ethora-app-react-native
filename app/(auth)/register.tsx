@@ -3,12 +3,13 @@ import { View, Text, TouchableOpacity, ImageBackground, StyleSheet, ActivityIndi
 import { whiteScreenBackgroundImage } from '@/src/core/docs/config';
 import { Button, FormTextField } from "@/src/core/components";
 import { getTurnstileToken } from "@/src/core/captcha/getTurnstileToken";
-import { GoogleSignInButton } from "@/src/modules/auth/components";
-import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { GoogleSignInButton, useGoogleSignInAvailable } from "@/src/modules/auth/components";
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/src/modules/auth/hooks";
 import { useAppBranding } from "@/src/modules/config/hooks";
+import { useAppColors } from "@/src/core/theme";
 
 type Form = { firstName: string; lastName: string; email: string; password: string };
 
@@ -16,6 +17,9 @@ export default function Register() {
   const { register, login, status } = useAuth();
   const { isBaseApp, theme } = useAppBranding();
   const primary = theme.primary;
+  const colors = useAppColors();
+  const googleAvailable = useGoogleSignInAvailable();
+  const showBrandBackground = isBaseApp && !theme.dark;
   const [showPassword, setShowPassword] = useState(false);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -182,10 +186,10 @@ export default function Register() {
 
   return (
     <ImageBackground
-      // Base app — branded background, custom domain — plain white
-      source={isBaseApp ? whiteScreenBackgroundImage : undefined}
+      // Base app — branded background, custom domain — plain white, dark theme — dark ground
+      source={showBrandBackground ? whiteScreenBackgroundImage : undefined}
       style={{
-        backgroundColor: isBaseApp ? 'rgba(0,0,255, 0.05)' : theme.background,
+        backgroundColor: showBrandBackground ? 'rgba(0,0,255, 0.05)' : theme.background,
         width: '100%',
         height: '100%',
       }}
@@ -204,7 +208,7 @@ export default function Register() {
             <View style={{ flex: 1 }}>
               <View className="flex-1 justify-center px-11 relative">
                 <TouchableOpacity style={{ position: "absolute", top: 55, left: 16, zIndex: 1 }} hitSlop={12} onPress={() => router.back()}>
-                  <Ionicons name="arrow-back" size={24} color="black" />
+                  <Ionicons name="arrow-back" size={24} color={colors.dark ? colors.text : "black"} />
                 </TouchableOpacity>
 
                 <View>
@@ -215,7 +219,7 @@ export default function Register() {
                   name="firstName"
                   placeholder="First Name"
                   rules={{ required: 'First Name is required' }}
-                  left={<FontAwesome5 name="user" size={20} color={primary} />}
+                  left={<Ionicons name="person-outline" size={20} color={primary} />}
                   accentColor={primary}
                   hint=" "
                 />
@@ -223,7 +227,7 @@ export default function Register() {
                   control={control}
                   name="lastName"
                   placeholder="Last Name"
-                  left={<FontAwesome5 name="user" size={20} color={primary} />}
+                  left={<Ionicons name="person-outline" size={20} color={primary} />}
                   accentColor={primary}
                   hint=" "
                 />
@@ -238,14 +242,14 @@ export default function Register() {
                   required: 'Email is required',
                   pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' },
                 }}
-                left={<FontAwesome name="envelope-o" size={20} color={primary} />}
+                left={<Ionicons name="mail-outline" size={20} color={primary} />}
                 accentColor={primary}
                 hint=" "
               />
 
               {emailSuggestion && (
                 <Text 
-                  style={{ color: '#8C8C8C', marginTop: 8 }}
+                  style={{ color: colors.dark ? colors.textSecondary : '#8C8C8C', marginTop: 8 }}
                   onPress={() => {
                     setValue('email', emailSuggestion, { shouldValidate: true });
                     setEmailSuggestion(null);
@@ -262,9 +266,9 @@ export default function Register() {
                 placeholder="Password"
                 secureTextEntry={!showPassword}
                 rules={{ required: 'Password is required', minLength: { value: 6, message: 'Min 6 chars' } }}
-                left={<FontAwesome5 name="star-of-life" size={20} color={primary} />}
+                left={<Ionicons name="lock-closed-outline" size={20} color={primary} />}
                 accentColor={primary}
-                right={<Ionicons name={showPassword ? 'eye' : 'eye-off'} size={20} color="#6B7280" />}
+                right={<Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={colors.placeholder} />}
                 onRightPress={() => setShowPassword((v) => !v)}
               />
 
@@ -280,7 +284,9 @@ export default function Register() {
                 <TouchableOpacity
                   style={[
                     styles.turnstileCheckbox,
+                    colors.dark && { backgroundColor: colors.inputBackground, borderColor: colors.border },
                     turnstileToken && styles.turnstileCheckboxSuccess,
+                    turnstileToken && colors.dark && { backgroundColor: colors.highlight },
                     isLoadingTurnstile && styles.turnstileCheckboxLoading,
                     (turnstileToken || isLoadingTurnstile) && { borderColor: primary },
                   ]}
@@ -293,11 +299,11 @@ export default function Register() {
                       {isLoadingTurnstile ? (
                         <ActivityIndicator size="small" color={primary} />
                       ) : turnstileToken ? (
-                        <View style={styles.successIconContainer}>
+                        <View style={[styles.successIconContainer, colors.dark && { backgroundColor: colors.highlight }]}>
                           <Ionicons name="checkmark-circle" size={32} color={primary} />
                         </View>
                       ) : (
-                        <View style={styles.shieldIconContainer}>
+                        <View style={[styles.shieldIconContainer, colors.dark && { backgroundColor: colors.border }]}>
                           <Ionicons name="shield-outline" size={28} color="#8F8F8F" />
                         </View>
                       )}
@@ -307,6 +313,7 @@ export default function Register() {
                       <Text
                         style={[
                           styles.turnstileLabel,
+                          colors.dark && { color: colors.text },
                           turnstileToken && styles.turnstileLabelSuccess,
                           turnstileToken && { color: primary },
                         ]}
@@ -338,15 +345,19 @@ export default function Register() {
               onPress={handleSubmit(onSubmit)}
               isSubmitting={status === 'loading'}
               isValid={isValid && !!turnstileToken}
-              color={isBaseApp ? undefined : primary}
+              color={showBrandBackground ? undefined : primary}
               />
 
-              <Text style={[styles.or, { color: primary }]}>or</Text>
-              <GoogleSignInButton
-                backgroundColor={primary}
-                textColor="#fff"
-                iconColor="#fff"
-              />
+              {googleAvailable && (
+                <>
+                  <Text style={[styles.or, { color: primary }]}>or</Text>
+                  <GoogleSignInButton
+                    backgroundColor={primary}
+                    textColor="#fff"
+                    iconColor="#fff"
+                  />
+                </>
+              )}
               </View>
             </View>
             </View>

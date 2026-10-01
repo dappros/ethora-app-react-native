@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, Easing } from 'react-native';
+import { useAppColors } from '@/src/core/theme';
 
 interface LoadingProps {
   size?: number;
@@ -9,9 +10,13 @@ interface LoadingProps {
 
 export const Loading: React.FC<LoadingProps> = ({
   size = 30,
-  color = '#0052CD',
-  backgroundColor = '#000000',
+  color: colorProp,
+  backgroundColor: backgroundColorProp,
 }) => {
+  const colors = useAppColors();
+  const color = colorProp ?? colors.primary;
+  // Inner ring: black on light, light on dark
+  const backgroundColor = backgroundColorProp ?? (colors.dark ? colors.text : '#000000');
   const outerRotation = useRef(new Animated.Value(0)).current;
   const innerRotation = useRef(new Animated.Value(0)).current;
 

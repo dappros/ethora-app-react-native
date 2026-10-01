@@ -30,6 +30,7 @@ const AUTH_WHITELIST: Array<string | RegExp> = [
   '/users/reset',
 ];
 const APP_ID_IN_BODY = [
+  '/users',
   '/users/login',
   '/users/login-with-email',
   '/users/sign-up-with-email',
@@ -37,9 +38,13 @@ const APP_ID_IN_BODY = [
   '/users/forgot',
 ];
 
+// Social sign-up is POST /users; the same path with GET is an authorized user listing
+const AUTH_WHITELIST_POST = ['/users'];
+
 const pathOf = (url?: string) => (url || '').split('?')[0];
-const isWhitelisted = (url?: string) => {
+const isWhitelisted = (url?: string, method = 'get') => {
   const path = pathOf(url);
+  if (method === 'post' && AUTH_WHITELIST_POST.includes(path)) return true;
   return AUTH_WHITELIST.some((rule) => (typeof rule === 'string' ? path === rule : rule.test(path)));
 };
 
@@ -76,7 +81,7 @@ export function attachCommonInterceptors(instance: AxiosInstance, version: 'v1' 
     // Refresh sets Authorization: <refreshToken> itself
     if (path === REFRESH_ENDPOINT) return config;
 
-    if (isWhitelisted(config.url)) {
+    if (isWhitelisted(config.url, method)) {
       config.headers.Authorization = getAppToken();
 
       if (method === 'post' && APP_ID_IN_BODY.includes(path)) {
@@ -100,7 +105,7 @@ export function attachCommonInterceptors(instance: AxiosInstance, version: 'v1' 
       const original = error.config;
       const path = pathOf(original?.url);
 
-      if (status !== 401 || !original || original._retry || path === REFRESH_ENDPOINT || isWhitelisted(original.url)) {
+      if (status !== 401 || !original || original._retry || path === REFRESH_ENDPOINT || isWhitelisted(original.url, (original.method || 'get').toLowerCase())) {
         return Promise.reject(error);
       }
 

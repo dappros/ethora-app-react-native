@@ -9,6 +9,8 @@ export interface UseAuthReturn {
     checked: boolean;
     rememberMe: boolean;
     login: (value: AuthLoginFetchDataValue) => Promise<AuthResponse>;
+    /** Google sign-in; rejects with GoogleSignInCancelled when the user dismisses the sheet */
+    loginWithGoogle: (value?: { utm?: string }) => Promise<AuthResponse>;
     register: (value: AuthRegistrationFetchDataValue) => Promise<AuthResponse>;
     check: () => Promise<AuthResponse>;
     logout: () => Promise<void>;

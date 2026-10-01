@@ -1,5 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { authCheckRequest, authLoginRequest, authRegistrationRequest, autRefreshRequest } from '@modules/auth/store/auth.thunk';
+import {
+  authCheckRequest,
+  authGoogleLoginRequest,
+  authLoginRequest,
+  authRegistrationRequest,
+  autRefreshRequest,
+} from '@modules/auth/store/auth.thunk';
 import { AuthSLiceState, UserType } from '@modules/auth//types';
 import { tokenStorage } from '@/src/core/lib/tokenStorage';
 
@@ -51,6 +57,31 @@ export const authSlice = createSlice({
     builder.addCase(authLoginRequest.rejected, (state, { payload }) => {
       console.log('payload', payload);
       state.status = 'error';
+    });
+
+    // GOOGLE LOGIN________________
+    builder.addCase(authGoogleLoginRequest.pending, (state) => {
+      state.status = 'loading';
+    });
+
+    builder.addCase(authGoogleLoginRequest.fulfilled, (state, { payload }) => {
+      state.status = 'success';
+      state.checked = true;
+      state.token = payload.token;
+      state.refreshToken = payload.refreshToken;
+      state.user = payload.user;
+
+      tokenStorage.setAll({
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        wsToken: payload.wsToken,
+      });
+    });
+
+    builder.addCase(authGoogleLoginRequest.rejected, (state, { payload, error }) => {
+      console.log('payload', payload ?? error);
+      // A dismissed Google sheet is not an auth error
+      state.status = error?.name === 'GoogleSignInCancelled' ? 'unset' : 'error';
     });
 
     // REGISTRATION________________

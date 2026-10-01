@@ -12,6 +12,8 @@ export interface CreateChatConfigOptions {
   domain: string | null;
   currentUser: UserType | null;
   tokens: { token: string; refreshToken: string };
+  /** Dark theme on: the chat switches to config.darkColors */
+  dark?: boolean;
   /** Ethora HTTP token refresh; the chat calls it on 401 */
   refresh: () => Promise<AuthRefreshResponse>;
   /** Extra element in the chat header (config.chatHeaderAdditional) */

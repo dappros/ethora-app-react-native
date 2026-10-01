@@ -14,7 +14,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Button } from '../Button';
-import { brand } from '@/src/core/theme';
+import { useAppColors } from '@/src/core/theme';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -44,6 +44,8 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
 }) => {
   const [visible, setVisible] = useState(isOpen);
   const progress = useSharedValue(0);
+  const colors = useAppColors();
+  const accent = color ?? colors.primary;
 
   useEffect(() => {
     if (isOpen) {
@@ -75,13 +77,17 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
       onRequestClose={handleClose}
       presentationStyle="overFullScreen">
       <TouchableWithoutFeedback onPress={handleClose}>
-        <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]} />
+        <Animated.View
+          style={[StyleSheet.absoluteFill, { backgroundColor: colors.overlay }, backdropStyle]}
+        />
       </TouchableWithoutFeedback>
 
       <View pointerEvents="box-none" style={styles.center}>
-        <Animated.View style={[styles.card, cardStyle]}>
-          <Text style={styles.title}>{title}</Text>
-          {message ? <Text style={styles.message}>{message}</Text> : null}
+        <Animated.View style={[styles.card, { backgroundColor: colors.surface }, cardStyle]}>
+          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          {message ? (
+            <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
+          ) : null}
 
           <Button
             title={confirmText}
@@ -96,8 +102,8 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
             onPress={handleClose}
             disabled={isSubmitting}
             accessibilityLabel={cancelText}
-            style={[styles.cancelButton, { borderColor: color ?? brand[500] }]}>
-            <Text style={[styles.cancelText, { color: color ?? brand[500] }]}>{cancelText}</Text>
+            style={[styles.cancelButton, { borderColor: accent }]}>
+            <Text style={[styles.cancelText, { color: accent }]}>{cancelText}</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -106,7 +112,6 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
   card: {
     width: '100%',

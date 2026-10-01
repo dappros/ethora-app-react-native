@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { configSLiceState, ModelApp } from '@modules/config/types';
 import { configAppRequest, configDomainRestore, configReset } from '@modules/config/store/config.thunk';
+import { parseFirebaseWebConfig } from '@modules/config/utils/firebaseConfig';
 
 export const initialState: configSLiceState = {
   config: {} as ModelApp,
@@ -20,7 +21,10 @@ export const configSlice = createSlice({
 
     builder.addCase(configAppRequest.fulfilled, (state, { payload, meta }) => {
       state.status = 'success';
-      state.config = payload;
+      state.config = {
+        ...payload,
+        firebaseConfigParsed: parseFirebaseWebConfig(payload.firebaseWebConfigString),
+      };
       state.domainName = meta.arg.domainName;
       state.domain = meta.arg.domain;
     });

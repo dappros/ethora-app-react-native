@@ -60,6 +60,23 @@ export interface AuthRefreshResponse {
   fileToken?: string;
 }
 
+/** Social (Google) auth, same contract as ethora-app-reactjs/src/http.ts httpLoginSocial / httpRegisterSocial */
+export interface AuthSocialFetchDataValue {
+  /** Firebase ID token of the signed-in Firebase user — the backend verifies this one */
+  idToken: string;
+  /** Provider (Google) OAuth access token */
+  accessToken: string;
+  loginType: 'google';
+  authToken?: string;
+  signupPlan?: string;
+  utm?: string;
+}
+
+/** GET /users/checkEmail/:email → success: true means the email is free (registration needed) */
+export interface AuthCheckEmailResponse {
+  success: boolean;
+}
+
 export interface AuthRegistrationFetchDataValue {
   email: string;
   password: string;

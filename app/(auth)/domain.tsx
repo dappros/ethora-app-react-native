@@ -59,6 +59,7 @@ export default function Domain() {
 
   return (
     <ImageBackground
+      // Branded image in both themes
       source={loginScreenBackgroundImage}
       style={{ backgroundColor: 'rgba(0,0,255, 0.05)', width: '100%', height: '100%' }}>
       {/* keyboard-controller's KeyboardAvoidingView animates in sync with the native keyboard */}

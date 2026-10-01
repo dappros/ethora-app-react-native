@@ -1,5 +1,12 @@
 import { AxiosResponse } from 'axios';
-import { AuthLoginFetchDataValue, AuthRefreshResponse, AuthRegistrationFetchDataValue, AuthResponse } from '@modules/auth/types';
+import {
+  AuthCheckEmailResponse,
+  AuthLoginFetchDataValue,
+  AuthRefreshResponse,
+  AuthRegistrationFetchDataValue,
+  AuthResponse,
+  AuthSocialFetchDataValue,
+} from '@modules/auth/types';
 import { $api, $apiV2 } from '@modules/auth/interceptors';
 import { tokenStorage } from '@/src/core/lib/tokenStorage';
 
@@ -18,6 +25,22 @@ export const authRefresh = async (): Promise<AxiosResponse<AuthRefreshResponse>>
   return $api.post<AuthRefreshResponse>('/users/login/refresh', null, {
     headers: { Authorization: refreshToken },
   });
+};
+
+// ----- social (Google) — mirrors the web flow in ethora-app-reactjs/src/pages/AuthPage/GoogleButton.tsx
+
+export const authCheckEmail = (email: string, appId: string): Promise<AxiosResponse<AuthCheckEmailResponse>> => {
+  return $api.get<AuthCheckEmailResponse>(`/users/checkEmail/${encodeURIComponent(email)}`, {
+    params: { appId },
+  });
+};
+
+export const authSocialRegister = (payload: AuthSocialFetchDataValue): Promise<AxiosResponse<AuthResponse>> => {
+  return $api.post<AuthResponse>('/users', { authToken: '', ...payload });
+};
+
+export const authSocialLogin = (payload: AuthSocialFetchDataValue): Promise<AxiosResponse<AuthResponse>> => {
+  return $api.post<AuthResponse>('/users/login', { authToken: 'authToken', ...payload });
 };
 
 export const authRegistretion = (payload: AuthRegistrationFetchDataValue): Promise<AxiosResponse<AuthResponse>> => {

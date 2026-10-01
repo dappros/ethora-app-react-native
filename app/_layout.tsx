@@ -12,6 +12,8 @@ import * as Linking from 'expo-linking';
 import '../global.css';
 import { View, Text } from 'react-native';
 import { Loading } from '@/src/core/components';
+import { StatusBar } from 'expo-status-bar';
+import { useAppColors } from '@/src/core/theme';
 
 export const EXPO_PUBLIC_DOMAIN_NAME = process.env.EXPO_PUBLIC_DOMAIN_NAME as string;
 
@@ -20,6 +22,7 @@ function AuthGate() {
   const segments = useSegments();
   const auth = useAuth();
   const { geConfigApp, restoreDomain, status: configStatus } = useConfig();
+  const colors = useAppColors();
 
   const [ready, setReady] = useState(false);
   const navigatedRef = useRef(false);
@@ -91,8 +94,10 @@ function AuthGate() {
 
   if (!ready) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Loading size={50} color="#0052CD" backgroundColor="#000000" />
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: colors.background }}>
+        <Loading size={50} />
       </View>
     );
   }
@@ -106,6 +111,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
+            <StatusBar style="auto" />
             <AuthGate />
           </KeyboardProvider>
         </GestureHandlerRootView>

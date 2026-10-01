@@ -16,7 +16,7 @@ import {
 import * as WebBrowser from 'expo-web-browser';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { type ImperativeRouter as Router } from 'expo-router';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -29,9 +29,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useForm } from 'react-hook-form';
 import { FormTextField } from '@/src/core/components';
-import { GoogleSignInButton } from '../GoogleSignInButton';
+import { GoogleSignInButton, useGoogleSignInAvailable } from '../GoogleSignInButton';
 import { useAuth } from '@modules/auth/hooks';
 import { useAppBranding } from '@modules/config/hooks';
+import { useAppColors } from '@/src/core/theme';
 
 type Form = { email: string; password: string };
 
@@ -43,11 +44,16 @@ interface RegularLoginModalProps {
 
 const H = Dimensions.get('window').height;
 const DURATION = 280;
+// "Back to Sign in" block above the sheet: chevron 24 + gap 6 + label 18
+const PULL_HEIGHT = 48;
+const PULL_GAP = 16;
 
 export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose, navigation }) => {
   const { login, status } = useAuth();
   const { theme } = useAppBranding();
   const primary = theme.primary;
+  const colors = useAppColors();
+  const googleAvailable = useGoogleSignInAvailable();
   const {
     control,
     handleSubmit,
@@ -171,7 +177,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Animated.View
           pointerEvents="none"
-          style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: colors.overlay }, backdropStyle]}
         />
         <KeyboardAvoidingView
           behavior="padding"
@@ -184,9 +190,25 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
           />
           <GestureDetector gesture={pan}>
             <Animated.View
-              style={[styles.sheet, keyboardOpen ? styles.sheetCompact : null, sheetStyle]}>
-              <View style={styles.pullArea}>
-                <TouchableOpacity onPress={handleClose} style={{ alignItems: 'center' }}>
+              style={[
+                styles.sheet,
+                { backgroundColor: colors.surface },
+                keyboardOpen ? styles.sheetCompact : null,
+                sheetStyle,
+              ]}>
+              {/* Same fill below the sheet: the keyboard has rounded top corners (iOS 26),
+                  without it the backdrop shows through between the sheet and the keyboard */}
+              <View
+                pointerEvents="none"
+                style={[styles.sheetUnderlay, { backgroundColor: colors.surface }]}
+              />
+
+              <View style={styles.pullArea} pointerEvents="box-none">
+                <TouchableOpacity
+                  onPress={handleClose}
+                  hitSlop={12}
+                  accessibilityLabel="Back to Sign in"
+                  style={styles.pullButton}>
                   <Ionicons name="chevron-down" size={24} color="#E8EDF2" />
                   <Text style={styles.backText}>Back to Sign in</Text>
                 </TouchableOpacity>
@@ -216,7 +238,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                         required: 'Email is required',
                         pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' },
                       }}
-                      left={<FontAwesome name="envelope-o" size={20} color={primary} />}
+                      left={<Ionicons name="mail-outline" size={20} color={primary} />}
                       accentColor={primary}
                       hint=" "
                     />
@@ -230,12 +252,12 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                         required: 'Password is required',
                         minLength: { value: 6, message: 'Min 6 chars' },
                       }}
-                      left={<FontAwesome5 name="star-of-life" size={20} color={primary} />}
+                      left={<Ionicons name="lock-closed-outline" size={20} color={primary} />}
                       right={
                         <Ionicons
-                          name={showPassword ? 'eye' : 'eye-off'}
+                          name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                           size={20}
-                          color="#6B7280"
+                          color={colors.placeholder}
                         />
                       }
                       onRightPress={() => setShowPassword((v) => !v)}
@@ -261,7 +283,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                       <Text style={styles.primaryBtnText}>Log in</Text>
                     </TouchableOpacity>
 
-                    {!keyboardOpen && (
+                    {!keyboardOpen && googleAvailable && (
                       <>
                         <Text style={[styles.or, { color: primary }]}>or</Text>
                         <GoogleSignInButton
@@ -283,7 +305,6 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
 };
 
 const styles = StyleSheet.create({
-  backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
   dismissArea: { flex: 1 },
   sheet: {
     width: '100%',
@@ -295,23 +316,33 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 45,
     shadowColor: '#000',
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 30,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 16,
   },
+  sheetUnderlay: { position: 'absolute', bottom: -H, left: 0, right: 0, height: H },
   sheetCompact: { height: undefined },
   scroll: { flexGrow: 0, flexShrink: 1 },
   sheetContent: { paddingBottom: 24 },
   pullArea: {
     position: 'absolute',
-    top: -84,
+    top: -PULL_HEIGHT - PULL_GAP,
+    height: PULL_HEIGHT,
     left: 0,
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  backText: { marginTop: 17, color: '#E8EDF2', fontFamily: 'VarelaRound-Regular' },
+  pullButton: { alignItems: 'center' },
+  backText: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 18,
+    color: '#E8EDF2',
+    fontFamily: 'VarelaRound-Regular',
+    textAlign: 'center',
+  },
   title: { color: '#0052CD', fontFamily: 'Poppins-Regular', fontSize: 40, marginBottom: 24 },
   link: { color: '#0052CD', textDecorationLine: 'underline' },
   primaryBtn: {

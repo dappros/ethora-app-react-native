@@ -26,7 +26,11 @@
           "image": "./assets/splash.png",
           "resizeMode": "contain",
           "backgroundColor": "#FFFFFF",
-          "imageWidth": 200
+          "imageWidth": 200,
+          "dark": {
+            "image": "./assets/splash.png",
+            "backgroundColor": "#0F1216"
+          }
         }
       ],
       [
@@ -36,12 +40,18 @@
           "icon": "./assets/notification-icon.png",
           "color": "#0052CD"
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.972933470054-ca7eragog9vsiq0kbl7i06ovupakr941"
+        }
       ]
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -52,7 +62,7 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "aps-environment": "development"
+        "aps-environment": "production"
       }
     },
     "android": {

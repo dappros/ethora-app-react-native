@@ -18,7 +18,7 @@ export default function AuthLayout() {
   }
 
   return (
-    <Suspense fallback={<Loading size={50} color="#0052CD" backgroundColor="#000000" />}>
+    <Suspense fallback={<Loading size={50} />}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="domain" />
         <Stack.Screen name="login" />
