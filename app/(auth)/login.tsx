@@ -2,6 +2,7 @@ import { View, Text, ImageBackground, Image, TouchableOpacity } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loginScreenBackgroundImage } from '@/src/core/docs/config';
 import {
   heightPercentageToDP as hp,
@@ -17,6 +18,7 @@ import { ConfirmModal } from '@/src/core/components';
 import { useAppBranding, useConfig } from '@/src/modules/config/hooks';
 
 export default function Login() {
+  const insets = useSafeAreaInsets();
   const { resetConfig } = useConfig();
   const { isBaseApp, displayName, logoSource, theme } = useAppBranding();
   const router = useRouter();
@@ -48,14 +50,14 @@ export default function Login() {
       <View
         className="w-[74%] h-full self-center relative flex flex-col justify-between"
         style={{
-          paddingTop: hp('5.5%'),
+          paddingTop: insets.top + hp('3%'),
           paddingBottom: hp('5.5%'),
         }}
       >
         <View>
           <View
-            className="flex-row items-center justify-between"
-            style={{ marginTop: isBaseApp ? 0 : hp('3%') }}
+            className="flex-row items-start justify-between"
+            style={{ marginTop: isBaseApp ? 0 : hp('3%'), alignItems: 'flex-start' }}
           >
             {/* Base app — small logo on the left; custom — large centered logo below */}
             {isBaseApp ? (

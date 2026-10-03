@@ -10,10 +10,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import * as Linking from 'expo-linking';
 import '../global.css';
-import { View, Text } from 'react-native';
+import { LogBox, View, Text } from 'react-native';
 import { Loading } from '@/src/core/components';
 import { StatusBar } from 'expo-status-bar';
 import { useAppColors } from '@/src/core/theme';
+
+if (__DEV__) {
+  LogBox.ignoreAllLogs();
+}
 
 export const EXPO_PUBLIC_DOMAIN_NAME = process.env.EXPO_PUBLIC_DOMAIN_NAME as string;
 

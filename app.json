@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ethora",
     "slug": "ethora-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -62,7 +62,7 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "aps-environment": "production"
+        "aps-environment": "development"
       }
     },
     "android": {

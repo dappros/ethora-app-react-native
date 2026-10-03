@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { loginScreenBackgroundImage, logoPath } from '@/src/core/docs/config';
 import { Button, ConfirmModal, TextField } from '@/src/core/components';
@@ -19,6 +20,7 @@ import { parseWorkspaceUrl } from '@/src/modules/config/utils/workspace';
 import { Workspace } from '@/src/modules/config/types';
 
 export default function Domain() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { geConfigApp, status } = useConfig();
 
@@ -67,7 +69,7 @@ export default function Domain() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View
             className="flex w-[74%] flex-1 flex-col justify-between self-center"
-            style={{ paddingTop: hp('5.5%'), paddingBottom: hp('5.5%') }}>
+            style={{ paddingTop: insets.top + hp('3%'), paddingBottom: hp('5.5%') }}>
             <Image
               alt="App logo"
               accessibilityLabel="App logo"
