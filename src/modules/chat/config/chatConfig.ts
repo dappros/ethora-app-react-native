@@ -89,20 +89,21 @@ export const createChatConfig = ({
     defaultRooms: app?.defaultRooms || [],
     chatHeaderAdditional: headerAdditional ? { enabled: true, element: headerAdditional } : undefined,
     // "Sign out" item in the room-list right menu: the library performs performLogout itself,
-    // then calls onAfterLogout — we reset the auth store there and (app)/_layout redirects to /login
+    // then calls onAfterLogout — we reset the auth store there and (app)/_layout redirects to /login.
+    // No label/confirm copy here: the library's own follows the app language.
     logout: {
       enabled: true,
-      label: 'Sign out',
-      confirm: {
-        title: 'Sign out?',
-        message: 'You will need to log in again to access your chats.',
-        confirmText: 'Sign out',
-        cancelText: 'Cancel',
-      },
+      confirm: true,
       onAfterLogout,
     },
     enableRoomsRetry: { enabled: false, helperText: '' },
     inAppNotifications: { enabled: true, showInContext: true },
+    e2ee: { enabled: true },
+    // Settings → Language: the interface language (user.appLanguage) and the
+    // language messages are translated into (user.chatLanguage), both kept on
+    // the profile. Translation itself is the server's, shown inline ("auto").
+    settings: { languages: { enabled: true }, changePassword: true },
+    translates: { enabled: true, mode: 'auto' },
   };
 
   if (userLoginPayload) {
