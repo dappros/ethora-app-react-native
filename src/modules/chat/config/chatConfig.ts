@@ -43,6 +43,7 @@ export const createChatConfig = ({
   refresh,
   headerAdditional,
   onAfterLogout,
+  onThemeChange,
 }: CreateChatConfigOptions): ChatConfig => {
   const userLoginPayload = makeChatUserLogin(currentUser, tokens);
   const apiDomain = domain || DEFAULT_API_DOMAIN;
@@ -98,6 +99,7 @@ export const createChatConfig = ({
     },
     enableRoomsRetry: { enabled: false, helperText: '' },
     inAppNotifications: { enabled: true, showInContext: true },
+    eventHandlers: onThemeChange ? { onThemeChange } : undefined,
     e2ee: { enabled: true },
     // Settings → Language: the interface language (user.appLanguage) and the
     // language messages are translated into (user.chatLanguage), both kept on

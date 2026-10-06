@@ -4,10 +4,15 @@ import { authSlice } from '@modules/auth/store';
 import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { createChatConfig } from '@modules/chat/config/chatConfig';
-import { ChatConfig } from '@modules/chat/types';
+import { ChatConfig, CreateChatConfigOptions } from '@modules/chat/types';
 import { useIsDarkTheme } from '@/src/core/theme';
 
-export const useChatConfig = (): ChatConfig => {
+export interface UseChatConfigOptions {
+  /** See CreateChatConfigOptions.onThemeChange; must be referentially stable */
+  onThemeChange?: CreateChatConfigOptions['onThemeChange'];
+}
+
+export const useChatConfig = ({ onThemeChange }: UseChatConfigOptions = {}): ChatConfig => {
   const { configApp, domain } = useConfig();
   const { user, token, refreshToken, refresh } = useAuth();
   const dispatch = useAppDispatch();
@@ -32,8 +37,9 @@ export const useChatConfig = (): ChatConfig => {
         dark,
         refresh,
         onAfterLogout,
+        onThemeChange,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [configApp, domain, dark, onAfterLogout, userId, xmppUsername, hasXmppPassword, refresh]
+    [configApp, domain, dark, onAfterLogout, onThemeChange, userId, xmppUsername, hasXmppPassword, refresh]
   );
 };

@@ -20,4 +20,9 @@ export interface CreateChatConfigOptions {
   headerAdditional?: () => ReactNode;
   /** Called after the full chat teardown (config.logout.onAfterLogout): host auth reset */
   onAfterLogout?: () => Promise<void> | void;
+  /**
+   * The chat's own appearance (Settings → Appearance), as the user picks it and on restore:
+   * the host paints its chrome (status bar) to match (config.eventHandlers.onThemeChange)
+   */
+  onThemeChange?: (preference: 'light' | 'dark' | 'system', isDark: boolean) => void;
 }
