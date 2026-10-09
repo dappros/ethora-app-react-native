@@ -80,7 +80,7 @@ export interface AuthCheckEmailResponse {
 export interface AuthRegistrationFetchDataValue {
   email: string;
   password: string;
-  cfToken: string;
+  cfToken?: string;
   firstName: string;
   lastName: string;
   signupPlan?: string;

@@ -106,6 +106,11 @@ export const createChatConfig = ({
     // the profile. Translation itself is the server's, shown inline ("auto").
     settings: { languages: { enabled: true }, changePassword: true },
     translates: { enabled: true, mode: 'auto' },
+    // Search in the room list also matches message text across all chats
+    // (WhatsApp-style "Messages" section). The archive it queries is scoped
+    // by app, so the library needs the appId alongside the flag.
+    enableMessageSearch: true,
+    appId: currentUser?.appId,
   };
 
   if (userLoginPayload) {

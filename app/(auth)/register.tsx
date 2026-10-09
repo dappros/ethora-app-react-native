@@ -13,6 +13,10 @@ import { useAppColors } from "@/src/core/theme";
 
 type Form = { firstName: string; lastName: string; email: string; password: string };
 
+// Cloudflare Turnstile ("Verify you are human") on sign-up. Off for now;
+// flip back to true to show the check again and require its token.
+const CAPTCHA_ENABLED = false;
+
 export default function Register() {
   const { register, login, status } = useAuth();
   const { isBaseApp, theme } = useAppBranding();
@@ -156,7 +160,7 @@ export default function Register() {
     }
 
     try {
-      if (!turnstileToken) {
+      if (CAPTCHA_ENABLED && !turnstileToken) {
         setError('email', {
           type: 'manual',
           message: 'Please complete the bot verification',
@@ -168,7 +172,14 @@ export default function Register() {
 
       const utm = "mobile-app";
       
-      await register({ firstName, lastName, email, password, cfToken: turnstileToken, utm });
+      await register({
+        firstName,
+        lastName,
+        email,
+        password,
+        ...(CAPTCHA_ENABLED && turnstileToken ? { cfToken: turnstileToken } : {}),
+        utm,
+      });
       await login({ email, password });
       router.replace("/(app)/chat");
     } catch (error: any) {
@@ -272,6 +283,7 @@ export default function Register() {
                 onRightPress={() => setShowPassword((v) => !v)}
               />
 
+              {CAPTCHA_ENABLED && (
               <Animated.View
                 style={[
                   styles.turnstileContainer,
@@ -339,12 +351,13 @@ export default function Register() {
                   </View>
                 </TouchableOpacity>
               </Animated.View>
+              )}
 
               <Button
               title="Sign up"
               onPress={handleSubmit(onSubmit)}
               isSubmitting={status === 'loading'}
-              isValid={isValid && !!turnstileToken}
+              isValid={isValid && (!CAPTCHA_ENABLED || !!turnstileToken)}
               color={showBrandBackground ? undefined : primary}
               />
 
