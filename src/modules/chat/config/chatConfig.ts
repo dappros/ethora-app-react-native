@@ -5,6 +5,8 @@ import { darkColors } from '@/src/core/theme';
 
 const DEFAULT_PRIMARY = '#0052CD';
 const SECONDARY = '#141414';
+const VIDEO_CALLS_ENABLED = process.env.EXPO_PUBLIC_VIDEO_CALLS_ENABLED === 'true';
+const LIVEKIT_URL = process.env.EXPO_PUBLIC_LIVEKIT_URL || '';
 
 export const makeChatUserLogin = (
   user: CreateChatConfigOptions['currentUser'],
@@ -111,6 +113,17 @@ export const createChatConfig = ({
     // by app, so the library needs the appId alongside the flag.
     enableMessageSearch: true,
     appId: currentUser?.appId,
+    // 1:1 audio/video calls over LiveKit, same settings as the web app
+    // (ethora-app-reactjs chatBootstrap.ts). Off unless EXPO_PUBLIC_VIDEO_CALLS_ENABLED
+    // is 'true' and EXPO_PUBLIC_LIVEKIT_URL points at the LiveKit server of the
+    // deployment. Needs a dev build: the LiveKit packages are native modules.
+    videoCalls: {
+      enabled: VIDEO_CALLS_ENABLED && Boolean(LIVEKIT_URL),
+      livekitUrl: LIVEKIT_URL,
+      allowedRoomTypes: ['private'],
+      enableAudioCalls: true,
+      startWithMicOn: true,
+    },
   };
 
   if (userLoginPayload) {
