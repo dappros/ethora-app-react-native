@@ -1,5 +1,4 @@
 import React, { FC } from "react";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { TouchableOpacity, Text } from "react-native";
 
 interface CreateAccountButtonProps {

@@ -1,4 +1,4 @@
-import { Tabs, Redirect } from 'expo-router';
+import { Tabs, Redirect, Slot } from 'expo-router';
 import { useAuth } from '@/src/modules/auth/hooks';
 import { useConfig } from '@/src/modules/config/hooks';
 import { usePushNotifications } from '@/src/modules/push';
@@ -15,6 +15,8 @@ export default function AppLayout() {
     return <Redirect href={configStatus === 'success' ? '/(auth)/login' : '/(auth)/domain'} />;
   }
 
+  // TEMP DIAG (iPad touches): render the route without the Tabs wrapper
+  if (true) return <Slot />;
   return (
     <Tabs initialRouteName="chat" screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}>
       <Tabs.Screen name="index" options={{ title: 'Home' }} />

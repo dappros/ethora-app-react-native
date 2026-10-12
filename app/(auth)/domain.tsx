@@ -11,16 +11,17 @@ import {
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { loginScreenBackgroundImage, logoPath } from '@/src/core/docs/config';
 import { Button, ConfirmModal, TextField } from '@/src/core/components';
 import { useConfig } from '@/src/modules/config/hooks';
 import { DEFAULT_API_DOMAIN, DEFAULT_DOMAIN_NAME } from '@/src/modules/config/constants';
 import { parseWorkspaceUrl } from '@/src/modules/config/utils/workspace';
 import { Workspace } from '@/src/modules/config/types';
+import { useResponsive } from '@/src/core/hooks';
 
 export default function Domain() {
   const insets = useSafeAreaInsets();
+  const { hp, isTablet, authContentWidth } = useResponsive();
   const router = useRouter();
   const { geConfigApp, status } = useConfig();
 
@@ -67,15 +68,22 @@ export default function Domain() {
       {/* keyboard-controller's KeyboardAvoidingView animates in sync with the native keyboard */}
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          {/* Phone — logo at the top, form at the bottom; tablet — both grouped in the middle */}
           <View
-            className="flex w-[74%] flex-1 flex-col justify-between self-center"
-            style={{ paddingTop: insets.top + hp('3%'), paddingBottom: hp('5.5%') }}>
+            className="flex flex-1 flex-col self-center"
+            style={{
+              width: authContentWidth,
+              justifyContent: isTablet ? 'center' : 'space-between',
+              paddingTop: insets.top + hp(3),
+              paddingBottom: hp(5.5),
+            }}>
             <Image
               alt="App logo"
               accessibilityLabel="App logo"
               source={logoPath}
               resizeMode="cover"
               className="block"
+              style={isTablet ? { marginBottom: 56 } : undefined}
             />
 
             <View testID="domain-screen">

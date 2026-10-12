@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/src/modules/auth/hooks";
 import { useAppBranding } from "@/src/modules/config/hooks";
 import { useAppColors } from "@/src/core/theme";
+import { AUTH_CONTENT_MAX_WIDTH } from "@/src/core/hooks";
 
 type Form = { firstName: string; lastName: string; email: string; password: string };
 
@@ -222,7 +223,8 @@ export default function Register() {
                   <Ionicons name="arrow-back" size={24} color={colors.dark ? colors.text : "black"} />
                 </TouchableOpacity>
 
-                <View>
+                {/* Capped width: fields do not stretch across a tablet / unfolded foldable */}
+                <View style={styles.form}>
               <Text style={[styles.title, { color: primary }]}>Hi, there!</Text>
 
                 <FormTextField<Form>
@@ -383,6 +385,7 @@ export default function Register() {
 
 const styles = StyleSheet.create({
   backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
+  form: { width: '100%', maxWidth: AUTH_CONTENT_MAX_WIDTH, alignSelf: 'center' },
   sheet: {
     width: '100%', height: '65%', backgroundColor: '#fff',
     borderTopLeftRadius: 80, borderTopRightRadius: 80,

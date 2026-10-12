@@ -21,7 +21,13 @@ export default function ChatScreen() {
   const isDark = chatIsDark ?? chatTheme.dark;
 
   return (
-    <View style={{ flex: 1, backgroundColor: chatTheme.listBackground }}>
+    <View
+      style={{ flex: 1, backgroundColor: chatTheme.listBackground }}
+      // TEMP DIAG (iPad touches): remove after debugging
+      onTouchStart={(e) => console.log('[DIAG] touchStart', e.nativeEvent.pageX, e.nativeEvent.pageY, e.nativeEvent.target)}
+      onTouchEnd={() => console.log('[DIAG] touchEnd')}
+      onTouchCancel={() => console.log('[DIAG] touchCancel')}
+      onStartShouldSetResponderCapture={() => { console.log('[DIAG] responderCapture'); return false; }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* <Chat> mounts its own redux Provider and XmppProvider (ReduxWrapper);
           the outer XmppProvider from 26.5.x is not needed here — in 26.7.x it crashes outside the library store.

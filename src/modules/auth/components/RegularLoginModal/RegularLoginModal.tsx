@@ -1,7 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Keyboard,
   Modal,
   Platform,
@@ -17,7 +16,6 @@ import * as WebBrowser from 'expo-web-browser';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { type ImperativeRouter as Router } from 'expo-router';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
@@ -33,6 +31,7 @@ import { GoogleSignInButton, useGoogleSignInAvailable } from '../GoogleSignInBut
 import { useAuth } from '@modules/auth/hooks';
 import { useAppBranding } from '@modules/config/hooks';
 import { useAppColors } from '@/src/core/theme';
+import { AUTH_CONTENT_MAX_WIDTH, useResponsive } from '@/src/core/hooks';
 
 type Form = { email: string; password: string };
 
@@ -42,11 +41,12 @@ interface RegularLoginModalProps {
   navigation: Router;
 }
 
-const H = Dimensions.get('window').height;
 const DURATION = 280;
 // "Back to Sign in" block above the sheet: chevron 24 + gap 6 + label 18
 const PULL_HEIGHT = 48;
 const PULL_GAP = 16;
+// On tablets 65% of the screen is far more than the form needs
+const TABLET_SHEET_MAX_HEIGHT = 600;
 
 export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose, navigation }) => {
   const { login, status } = useAuth();
@@ -68,6 +68,9 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
   const [visible, setVisible] = useState(isOpen);
   const [showPassword, setShowPassword] = useState(false);
   const insets = useSafeAreaInsets();
+  // Live window height: follows rotation, Split View resizes and fold / unfold
+  const { height: H, isTablet } = useResponsive();
+  const sheetHeight = isTablet ? Math.min(H * 0.65, TABLET_SHEET_MAX_HEIGHT) : H * 0.65;
 
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   useEffect(() => {
@@ -135,7 +138,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
     .onUpdate((e) => {
       const next = Math.max(0, startY.value + e.translationY);
       translateY.value = next;
-      const p = 1 - Math.min(1, next / (H * 0.65));
+      const p = 1 - Math.min(1, next / sheetHeight);
       progress.value = p;
     })
     .onEnd((e) => {
@@ -192,7 +195,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
             <Animated.View
               style={[
                 styles.sheet,
-                { backgroundColor: colors.surface },
+                { backgroundColor: colors.surface, height: sheetHeight },
                 keyboardOpen ? styles.sheetCompact : null,
                 sheetStyle,
               ]}>
@@ -200,7 +203,10 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                   without it the backdrop shows through between the sheet and the keyboard */}
               <View
                 pointerEvents="none"
-                style={[styles.sheetUnderlay, { backgroundColor: colors.surface }]}
+                style={[
+                  styles.sheetUnderlay,
+                  { backgroundColor: colors.surface, bottom: -H, height: H },
+                ]}
               />
 
               <View style={styles.pullArea} pointerEvents="box-none">
@@ -225,7 +231,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                   },
                 ]}>
                 <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                  <View>
+                  <View style={styles.form}>
                     <Text style={[styles.title, { color: primary }]}>Hello again!</Text>
 
                     <FormTextField<Form>
@@ -308,7 +314,6 @@ const styles = StyleSheet.create({
   dismissArea: { flex: 1 },
   sheet: {
     width: '100%',
-    height: H * 0.65,
     maxHeight: '100%',
     backgroundColor: '#fff',
     borderTopLeftRadius: 80,
@@ -321,10 +326,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     elevation: 16,
   },
-  sheetUnderlay: { position: 'absolute', bottom: -H, left: 0, right: 0, height: H },
+  sheetUnderlay: { position: 'absolute', left: 0, right: 0 },
   sheetCompact: { height: undefined },
   scroll: { flexGrow: 0, flexShrink: 1 },
   sheetContent: { paddingBottom: 24 },
+  // Sheet spans the full width; the form inside is capped and centered on large screens
+  form: { width: '100%', maxWidth: AUTH_CONTENT_MAX_WIDTH, alignSelf: 'center' },
   pullArea: {
     position: 'absolute',
     top: -PULL_HEIGHT - PULL_GAP,
