@@ -2,6 +2,7 @@ import { ChatConfig, ChatUserLoginUser, CreateChatConfigOptions } from '@modules
 import { apiBaseUrl, xmppHostFor, xmppSettingsFor } from '@modules/config/utils/workspace';
 import { DEFAULT_API_DOMAIN } from '@modules/config/constants';
 import { darkColors } from '@/src/core/theme';
+import { ongoingCallNotification } from '@/modules/ethora-call-notification';
 
 const DEFAULT_PRIMARY = '#0052CD';
 const SECONDARY = '#141414';
@@ -123,6 +124,9 @@ export const createChatConfig = ({
       allowedRoomTypes: ['private'],
       enableAudioCalls: true,
       startWithMicOn: true,
+      // Android: call notification with hang up / mute / camera. iOS uses
+      // CallKit (react-native-callkeep) inside the SDK instead.
+      ongoingCallNotification,
     },
   };
 

@@ -74,7 +74,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
-          "audio"
+          "audio",
+          "voip"
         ]
       },
       "entitlements": {
