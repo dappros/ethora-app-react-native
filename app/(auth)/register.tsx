@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { View, Text, TouchableOpacity, ImageBackground, StyleSheet, ActivityIndicator, Animated, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
-import { whiteScreenBackgroundImage } from '@/src/core/docs/config';
+import { transparentScreenBackgroundImage } from '@/src/core/docs/config';
 import { Button, FormTextField } from "@/src/core/components";
 import { getTurnstileToken } from "@/src/core/captcha/getTurnstileToken";
 import { GoogleSignInButton, useGoogleSignInAvailable } from "@/src/modules/auth/components";
@@ -24,7 +24,7 @@ export default function Register() {
   const primary = theme.primary;
   const colors = useAppColors();
   const googleAvailable = useGoogleSignInAvailable();
-  const showBrandBackground = isBaseApp && !theme.dark;
+  const showBrandBackground = isBaseApp;
   const [showPassword, setShowPassword] = useState(false);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -198,10 +198,13 @@ export default function Register() {
 
   return (
     <ImageBackground
-      // Base app — branded background, custom domain — plain white, dark theme — dark ground
-      source={showBrandBackground ? whiteScreenBackgroundImage : undefined}
+      // Base app — transparent brand image over the screen ground (white or dark), custom domain — plain ground
+      source={showBrandBackground ? transparentScreenBackgroundImage : undefined}
+      // Inset the logo from the top, left and bottom; it stays flush with the right edge
+      imageStyle={{ left: '9%', top: '11%', width: '91%', height: '81%' }}
+      resizeMode="cover"
       style={{
-        backgroundColor: showBrandBackground ? 'rgba(0,0,255, 0.05)' : theme.background,
+        backgroundColor: colors.background,
         width: '100%',
         height: '100%',
       }}

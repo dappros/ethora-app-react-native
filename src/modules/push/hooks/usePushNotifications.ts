@@ -6,6 +6,8 @@ import { handlePushPayload } from '@ethora/chat-component-rn';
 import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { syncPushRegistration } from '@modules/push/service/pushService';
+import { useAppIconBadge } from '@modules/push/hooks/useAppIconBadge';
+import { payloadOf } from '@modules/push/lib/notificationPayload';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -14,28 +16,19 @@ Notifications.setNotificationHandler({
       shouldShowBanner: show,
       shouldShowList: show,
       shouldPlaySound: show,
-      shouldSetBadge: false,
+      // In the foreground useAppIconBadge owns the number (the app knows what
+      // the user has just read, the server may not yet).
+      shouldSetBadge: show,
     };
   },
 });
-
-const payloadOf = (response: Notifications.NotificationResponse): Record<string, unknown> => {
-  const request = response.notification.request;
-  const data = (request.content.data ?? {}) as Record<string, unknown>;
-  const trigger = request.trigger as { type?: string; payload?: unknown } | null;
-  const raw =
-    trigger?.type === 'push' && trigger.payload && typeof trigger.payload === 'object'
-      ? (trigger.payload as Record<string, unknown>)
-      : {};
-  const body = raw.body && typeof raw.body === 'object' ? (raw.body as Record<string, unknown>) : {};
-  return { ...raw, ...body, ...data };
-};
 
 /**
  * Host-side push lifecycle. Mounted once in the authorized layout:
  *  - registers the native token on the API of the CURRENT domain
  *    (re-registers when the token rotates or domain/app/user change);
- *  - routes notification taps (including cold start) to the chat screen.
+ *  - routes notification taps (including cold start) to the chat screen;
+ *  - keeps the app-icon badge equal to the total unread.
  * Unregistering on logout lives in useAuth.logout, not here.
  */
 export const usePushNotifications = (): void => {
@@ -46,6 +39,8 @@ export const usePushNotifications = (): void => {
   const appId = configApp?._id;
   const userId = user?._id;
   const ready = Boolean(token && userId && appId && domain && status === 'success');
+
+  useAppIconBadge(token ? userId : undefined);
 
   // Keep the backend registration in sync with (domain, app, user).
   useEffect(() => {
@@ -77,7 +72,7 @@ export const usePushNotifications = (): void => {
       if (handledResponseRef.current === id) return;
       handledResponseRef.current = id;
 
-      const data = payloadOf(response);
+      const data = payloadOf(response.notification);
       const outcome = handlePushPayload(data);
       console.log('[push] notification tap →', outcome, data.jid ?? '');
       router.replace('/(app)/chat');

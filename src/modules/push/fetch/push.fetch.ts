@@ -15,15 +15,30 @@ export const registerPushToken = (
   payload: RegisterPushTokenPayload
 ) => $api.post(`/push/subscription/${appId}`, payload, { baseURL: apiBaseUrl(domain) });
 
+// `noRefresh`: a 401 is returned as is instead of refreshing the session —
+// for dropping a registration on another server, where the current token may
+// simply not be valid (a failed refresh would log the user out).
+const noRefreshConfig = (noRefresh?: boolean) => (noRefresh ? { _retry: true } : {});
 
-export const unregisterPushToken = (domain: string, appId: string, registrationToken: string) =>
+export const unregisterPushToken = (
+  domain: string,
+  appId: string,
+  registrationToken: string,
+  noRefresh?: boolean
+) =>
   $api.delete(`/push/subscription/${appId}`, {
     baseURL: apiBaseUrl(domain),
     data: { registrationToken },
+    ...noRefreshConfig(noRefresh),
   });
 
-export const unregisterPushTokenLegacy = (domain: string, registrationToken: string) =>
+export const unregisterPushTokenLegacy = (
+  domain: string,
+  registrationToken: string,
+  noRefresh?: boolean
+) =>
   $api.delete('/users/endpoints', {
     baseURL: apiBaseUrl(domain),
     data: { endpoint: registrationToken },
+    ...noRefreshConfig(noRefresh),
   });

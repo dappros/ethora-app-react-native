@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { logoutService } from "@ethora/chat-component-rn";
 // Service import (not the @modules/push barrel): the barrel re-exports usePushNotifications, which imports useAuth → cycle
 import { dropPushRegistration } from "@modules/push/service/pushService";
+import { clearAppIconBadge } from "@modules/push/service/appIconBadge";
 import { signOutGoogle } from "@modules/auth/lib/googleSignIn";
 import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
@@ -56,6 +57,7 @@ export const useAuth = (): UseAuthReturn => {
     await dropPushRegistration();
     await signOutGoogle();
     await logoutService.performLogout();
+    await clearAppIconBadge();
     dispatch(authSlice.actions.authLogout());
   }, [dispatch]);
 

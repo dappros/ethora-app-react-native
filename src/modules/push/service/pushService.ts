@@ -29,13 +29,13 @@ const sameRegistration = (record: PushRegistrationRecord | null, next: PushRegis
 
 let inFlight: Promise<void> | null = null;
 
-const unregister = async (record: PushRegistrationRecord): Promise<void> => {
+const unregister = async (record: PushRegistrationRecord, noRefresh?: boolean): Promise<void> => {
   try {
-    await unregisterPushToken(record.domain, record.appId, record.registrationToken);
+    await unregisterPushToken(record.domain, record.appId, record.registrationToken, noRefresh);
   } catch (error) {
     const status = (error as { response?: { status?: number } })?.response?.status;
     if (status !== 404) throw error;
-    await unregisterPushTokenLegacy(record.domain, record.registrationToken);
+    await unregisterPushTokenLegacy(record.domain, record.registrationToken, noRefresh);
   }
 };
 
@@ -87,6 +87,19 @@ export const syncPushRegistration = async (target: PushTarget): Promise<void> =>
       const current = await pushStorage.get();
       if (sameRegistration(current, next)) return;
 
+      // Domain/app/user switch or token rotation: drop the previous
+      // registration first, otherwise the old server keeps pushing to this
+      // device. Best effort — the old server may reject the current auth.
+      if (current) {
+        await unregister(current, true).catch((error) => {
+          const status = (error as { response?: { status?: number } })?.response?.status;
+          console.warn(
+            `[push] could not drop previous registration on ${current.domain}`,
+            status ?? ''
+          );
+        });
+        await pushStorage.clear();
+      }
 
       const contract = await registerWithFallback(target, {
         registrationToken: native.token,

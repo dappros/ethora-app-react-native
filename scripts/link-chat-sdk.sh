@@ -4,7 +4,7 @@
 #   scripts/link-chat-sdk.sh          # build ../ethora-chat-component-rn and copy it into node_modules
 #   scripts/link-chat-sdk.sh restore  # go back to the version from package.json (npm install)
 #
-# Copies lib/ (built with bob) and src/ into node_modules/@ethora/chat-component-rn.
+# Copies lib/ (built with bob), src/ and the config plugin into node_modules/@ethora/chat-component-rn.
 # Metro picks the change up on the next reload (no re-install, no native rebuild -
 # unless the SDK change touches native code or config plugins).
 set -euo pipefail
@@ -29,6 +29,11 @@ echo "Copying lib/ and src/ into $DEST..."
 rsync -a --delete "$SDK_DIR/lib/" "$DEST/lib/"
 rsync -a --delete "$SDK_DIR/src/" "$DEST/src/"
 cp "$SDK_DIR/CHANGELOG.md" "$DEST/CHANGELOG.md" 2>/dev/null || true
+# Config plugin (iOS notification service extension); needs a prebuild to take effect.
+cp "$SDK_DIR/app.plugin.js" "$DEST/app.plugin.js"
+mkdir -p "$DEST/plugins"
+cp "$SDK_DIR/plugins/withNotificationServiceExtension.js" "$DEST/plugins/"
+rsync -a --delete "$SDK_DIR/plugins/notification-service/" "$DEST/plugins/notification-service/"
 
 SDK_VER=$(node -p "require('$SDK_DIR/package.json').version")
 echo "Linked local SDK $SDK_VER (package.json still pins $(node -p "require('$APP_DIR/package.json').dependencies['@ethora/chat-component-rn']"))."
