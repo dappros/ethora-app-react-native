@@ -15,6 +15,10 @@ export interface RegisterPushTokenPayload {
   deviceType: PushDeviceType;
   tokenType?: PushTokenType;
   buildOrigin?: PushBuildOrigin;
+  /** Encrypted pushes: base64 X25519 public key of this install (`ensurePushKeyPair`). */
+  pushKey?: string;
+  pushKeyAlg?: 'sealed-box-x25519';
+  pushKeyId?: string;
 }
 
 /** What we last registered and where — needed to unregister on logout/workspace switch. */
@@ -24,4 +28,6 @@ export interface PushRegistrationRecord {
   domain: string;
   appId: string;
   userId: string;
+  /** Id of the device key sent with the token; a new key re-registers. */
+  pushKeyId?: string;
 }

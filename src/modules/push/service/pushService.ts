@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { ensurePushKeyPair } from '@ethora/chat-component-rn';
 import {
   registerPushToken,
   unregisterPushToken,
@@ -20,12 +21,18 @@ export interface PushTarget {
 const buildOrigin = (): PushBuildOrigin =>
   Constants.expoConfig?.extra?.push?.buildOrigin === 'tenant' ? 'tenant' : 'platform';
 
+// `extra.push.encrypted: false` in app.json registers without a device key
+// (and removes a stored one), so pushes come in the clear — a switch for
+// telling a sealed-push problem from a push problem.
+const encryptedPushes = (): boolean => Constants.expoConfig?.extra?.push?.encrypted !== false;
+
 const sameRegistration = (record: PushRegistrationRecord | null, next: PushRegistrationRecord) =>
   !!record &&
   record.registrationToken === next.registrationToken &&
   record.domain === next.domain &&
   record.appId === next.appId &&
-  record.userId === next.userId;
+  record.userId === next.userId &&
+  (record.pushKeyId ?? '') === (next.pushKeyId ?? '');
 
 let inFlight: Promise<void> | null = null;
 
@@ -54,6 +61,14 @@ const registerWithFallback = async (
     return 'new';
   } catch (error) {
     if (!isUnknownFieldError(error)) throw error;
+    // An older backend: without `tokenType` it still delivers; without
+    // `pushKey` it delivers in the clear. Plain pushes beat no pushes for
+    // the store app, so register anyway — loudly.
+    if (payload.pushKey) {
+      console.warn(
+        `[push] ${target.domain} does not support encrypted pushes yet; registering for plain pushes`
+      );
+    }
     await registerPushToken(target.domain, target.appId, {
       registrationToken: payload.registrationToken,
       deviceType: payload.deviceType,
@@ -77,11 +92,17 @@ export const syncPushRegistration = async (target: PushTarget): Promise<void> =>
       const native = await getNativePushToken();
       if (!native) return;
 
+      // Encrypted pushes: the install's X25519 key, created on first use and
+      // kept in the keychain / keystore where the iOS extension and the
+      // Android task read it. Without a key (no secure store) pushes stay plain.
+      const pushKey = encryptedPushes() ? await ensurePushKeyPair() : null;
+
       const next: PushRegistrationRecord = {
         registrationToken: native.token,
         domain: target.domain,
         appId: target.appId,
         userId: target.userId,
+        ...(pushKey ? { pushKeyId: pushKey.keyId } : {}),
       };
 
       const current = await pushStorage.get();
@@ -106,10 +127,19 @@ export const syncPushRegistration = async (target: PushTarget): Promise<void> =>
         deviceType: native.deviceType,
         tokenType: native.tokenType,
         buildOrigin: buildOrigin(),
+        ...(pushKey
+          ? { pushKey: pushKey.publicKey, pushKeyAlg: 'sealed-box-x25519', pushKeyId: pushKey.keyId }
+          : // "" removes a key the service may still hold for this token.
+            { pushKey: '' }),
       });
       await pushStorage.set(next);
       console.log(
-        `[push] registered ${native.tokenType} token (${buildOrigin()}, ${contract} contract) on ${target.domain}`
+        `[push] registered ${native.tokenType} token (${buildOrigin()}, ${contract} contract) on ${target.domain}` +
+          (pushKey
+            ? `, encrypted pushes with key ${pushKey.keyId}`
+            : encryptedPushes()
+              ? ', plain pushes (no device key)'
+              : ', plain pushes (encryption switched off in app.json)')
       );
       // Dev only: the raw token lets a push be sent to APNs/FCM directly, bypassing the backend
       if (__DEV__) console.log(`[push] ${native.tokenType} token:`, native.token);

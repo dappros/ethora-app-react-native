@@ -1,6 +1,6 @@
 {
   "name": "ethora-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "scripts": {
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@config-plugins/react-native-webrtc": "^15.0.2",
-    "@ethora/chat-component-rn": "26.10.6",
+    "@ethora/chat-component-rn": "26.10.7",
     "@expo/vector-icons": "^15.0.2",
     "@livekit/react-native": "^3.0.0",
     "@livekit/react-native-expo-plugin": "^1.0.3",
@@ -44,6 +44,7 @@
     "expo-secure-store": "~57.0.2",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
+    "expo-task-manager": "~57.0.21",
     "expo-video": "~57.0.3",
     "expo-web-browser": "~57.0.2",
     "firebase": "^12.19.0",
@@ -77,6 +78,6 @@
     "tailwindcss": "^3.4.0",
     "typescript": "~6.0.3"
   },
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "private": true
 }
