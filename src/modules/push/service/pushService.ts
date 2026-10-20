@@ -7,6 +7,7 @@ import {
 } from '@modules/push/fetch';
 import { pushStorage } from '@modules/push/lib/pushStorage';
 import { ensurePushPermission, getNativePushToken } from '@modules/push/service/pushToken';
+import { dropVoipRegistration } from '@modules/push/service/voipPushService';
 import { PushBuildOrigin, PushRegistrationRecord, RegisterPushTokenPayload } from '@modules/push/types';
 
 export interface PushTarget {
@@ -158,11 +159,12 @@ export const syncPushRegistration = async (target: PushTarget): Promise<void> =>
 };
 
 /**
- * Remove the active registration from the backend. Call BEFORE the auth
+ * Remove the active registrations (and the iOS VoIP one) from the backend. Call BEFORE the auth
  * tokens are cleared (the DELETE is authorized with the user's token).
  * Best effort, never throws.
  */
 export const dropPushRegistration = async (): Promise<void> => {
+  await dropVoipRegistration();
   try {
     const record = await pushStorage.get();
     if (!record) return;

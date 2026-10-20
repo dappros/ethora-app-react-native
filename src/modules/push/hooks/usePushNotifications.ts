@@ -7,6 +7,7 @@ import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { syncPushRegistration } from '@modules/push/service/pushService';
 import { useAppIconBadge } from '@modules/push/hooks/useAppIconBadge';
+import { useIncomingCallPushes } from '@modules/push/hooks/useIncomingCallPushes';
 import { payloadOf } from '@modules/push/lib/notificationPayload';
 
 Notifications.setNotificationHandler({
@@ -28,7 +29,8 @@ Notifications.setNotificationHandler({
  *  - registers the native token on the API of the CURRENT domain
  *    (re-registers when the token rotates or domain/app/user change);
  *  - routes notification taps (including cold start) to the chat screen;
- *  - keeps the app-icon badge equal to the total unread.
+ *  - keeps the app-icon badge equal to the total unread;
+ *  - incoming calls by push (iOS VoIP token + CallKit, Android call notification).
  * Unregistering on logout lives in useAuth.logout, not here.
  */
 export const usePushNotifications = (): void => {
@@ -41,6 +43,9 @@ export const usePushNotifications = (): void => {
   const ready = Boolean(token && userId && appId && domain && status === 'success');
 
   useAppIconBadge(token ? userId : undefined);
+
+  // Incoming calls by push: iOS VoIP (PushKit + CallKit), Android call notification.
+  useIncomingCallPushes(ready && domain && appId && userId ? { domain, appId, userId } : null);
 
   // Keep the backend registration in sync with (domain, app, user).
   useEffect(() => {

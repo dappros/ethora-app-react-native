@@ -150,6 +150,57 @@ push to while offline. The SDK's own `usePushNotifications` is **not mounted** (
 legacy `push.<domain>/api/v1/subscriptions` contract), so token handling is the host's job — this module.
 Customers' host apps that embed the component must implement the same.
 
+## 5a. Incoming calls by push (iOS VoIP, Android call notification)
+
+Added 2026-10-20. Calls ring through the XMPP `call-token` stanza only while the socket is up; with the
+app in the background or killed the backend's call push is what rings
+(`POST /v1/chats/call/create/:chatName` → `POST /api/v2/push/call` on the push service, payload
+`type: "call", callId, callToken, room, kind, callerName, callerXmppUsername`). Only while calls are on in
+the build (`EXPO_PUBLIC_VIDEO_CALLS_ENABLED` + `EXPO_PUBLIC_LIVEKIT_URL`, `videoCallsEnabled` in
+`chatConfig.ts`).
+
+**iOS — PushKit + CallKit** (`modules/ethora-voip`, local Expo module, iOS only):
+
+- `EthoraVoipAppDelegate` (app-delegate subscriber) creates the `PKPushRegistry` on every launch and sets
+  callkeep's CallKit provider up natively (`EthoraCallKitBridge.m` → `[RNCallKeep setup:]`, the same
+  options the SDK passes from JS; the SDK's JS setup then becomes a no-op).
+- `VoipPushManager.didReceiveIncomingPushWith` reports EVERY VoIP push to CallKit before returning
+  (`[RNCallKeep reportNewIncomingCall:... fromPushKit:YES]`) — iOS kills an app that does not, and stops
+  delivering its VoIP pushes after a few misses. The UUID is `CallKitUuid.make(callId)`, a Swift port of
+  the SDK's `callKitUuid`; `modules/ethora-voip/check/run.sh` compares the two. Same UUID on both sides is
+  the dedupe: whichever of the VoIP push and the XMPP invite comes second gets `CallUUIDAlreadyExists`
+  instead of a second ringing call. A push without a callId is reported and ended at once. A call still
+  ringing after 60 s is ended natively (backstop; the SDK gives up at 45 s).
+- The payload goes to JS: `onIncomingCall` event, or `takePendingCalls()` after a cold start.
+  `hooks/useIncomingCallPushes.ts` passes it to the SDK's `handlePushPayload` and opens `/(app)/chat`.
+  The SDK holds the push until `<Chat>` has configured its store, rings it, and adopts the CallKit call;
+  an answer or decline made on the lock screen before JS was up is replayed from callkeep's buffered
+  events.
+- `service/voipPushService.ts` registers the PushKit token as `tokenType: "apns-voip"` (next to the
+  `apns` one, separate record `push.registration.voip`), re-registers on rotation, drops it on logout and
+  when calls are off in the build. No legacy fallback: a backend without `tokenType` would store it as
+  FCM.
+- Nothing new in app.json: `UIBackgroundModes` already has `voip`, `aps-environment` is there. The module
+  is autolinked from `modules/`; a native rebuild (pod install) is needed.
+
+**Android — data push → full-screen call notification** (`modules/ethora-call-notification`):
+
+- The call push is data-only, high priority. The SDK's background task (`registerSealedPushTask` in
+  `src/modules/push/sealedPushTask.ts`, also with the app killed) calls `onCallPush` →
+  `showIncomingCallNotification`: a CallStyle incoming-call notification with a full-screen intent
+  (wakes and opens the app on a locked phone), ringtone channel `ethora_incoming_call` (insistent), Answer
+  and Decline, 45 s timeout. Not shown in the foreground, where the XMPP invite rings the in-app screen.
+- Answer / tap open the app with the payload (`takeLaunchCall()` on cold start, `onIncomingCallAction`
+  otherwise; the activity is shown over the lock screen until it goes to the background). The hook calls
+  `answerCallFromPush` (rings and accepts) or `handlePushPayload` (in-app ring screen). Decline calls
+  `declineCallFromPush` when JS is alive; with the app killed the notification is only dismissed and the
+  caller's own 30 s timeout ends the call.
+- Manifest: `USE_FULL_SCREEN_INTENT` (Android 14+ grants it by default only to calling/alarm apps; Play
+  asks for a declaration). Without it the notification is a heads-up instead of a full screen.
+
+Device checks still to do: iOS locked / background / killed (answer and decline on the lock screen,
+caller hangs up while ringing), Android killed + locked, Doze.
+
 ## 6. API contract (domain backend)
 
 ### Token registration (final backend contract, 2026-09-07)
@@ -356,19 +407,13 @@ Open on the backend side: pushes on QA are not sent at all — see `push-qa-repo
 1. **Opening the exact room on tap.** The SDK keeps `pendingNotificationJid` in its internal store and
    does not export the setter. Today a tap lands on the chat screen and the `jid` is logged. Needs the
    `handlePushPayload` export above, then one line in `usePushNotifications.ts`.
-2. **Calls, Android in background.** The SDK accepts an incoming call from a data push
-   (`helpers/callPush.ts`, `handleCallPush`): it needs `type: "call"`, `callId`, `callToken` (LiveKit
-   token — without it the SDK does not ring), `callRoom`/`jid`, `callerName`, `kind`. On the host: a
-   background data-push handler → `react-native-callkeep` (`displayIncomingCall`). Requires the SDK's
-   optional peers: `@livekit/react-native@2.7.6`, `@livekit/react-native-webrtc@125.0.11`,
-   `livekit-client@2.9.0`, `react-native-callkeep@4.3.16`, and `videoCalls: { enabled, livekitUrl }` in the
-   chat config. `livekitUrl` is not in `get-config` yet — needs a convention (`wss://livekit.<domain>`)
-   or a new field.
-3. **Calls, iOS in background/killed.** Only via a PushKit VoIP push + CallKit:
-   `react-native-voip-push-notification`, VoIP token registration (`tokenType: "voip"`, topic
-   `com.ethora.app.voip`, same `.p8`), mandatory `reportNewIncomingCall` on every VoIP push. Backend
-   side — a VoIP path (`mod_offline_post.voip_post_url` exists in ejabberd, the sender does not). SDK
-   26.7.2 does not support this (see `useCallKeep.ts`).
+2. **Calls, Android in background.** Done 2026-10-20, see §5a (own CallStyle notification, not
+   callkeep's ConnectionService, which stays unlinked on Android).
+3. **Calls, iOS in background/killed.** Done 2026-10-20, see §5a (own PushKit module instead of
+   `react-native-voip-push-notification`). Backend: `apns-voip` subscriptions and the voip APNs shape
+   exist (`services/push/payload-shapes.js`). Open on the backend: a device with both an `apns` and an
+   `apns-voip` token gets the call twice (alert banner "Incoming call" + CallKit) — the call job does not
+   skip the alert push for a device that has a VoIP token.
 4. **Web SDK** uses the same endpoint with `deviceType: 'web'` — the backend changes are backward compatible.
 
 ## 10a. Observed production payload (old backend, Android)

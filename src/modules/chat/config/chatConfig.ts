@@ -9,6 +9,9 @@ const SECONDARY = '#141414';
 const VIDEO_CALLS_ENABLED = process.env.EXPO_PUBLIC_VIDEO_CALLS_ENABLED === 'true';
 const LIVEKIT_URL = process.env.EXPO_PUBLIC_LIVEKIT_URL || '';
 
+/** Calls are on in this build; also decides whether the device asks for VoIP pushes. */
+export const videoCallsEnabled = VIDEO_CALLS_ENABLED && Boolean(LIVEKIT_URL);
+
 export const makeChatUserLogin = (
   user: CreateChatConfigOptions['currentUser'],
   tokens: CreateChatConfigOptions['tokens']
@@ -119,7 +122,7 @@ export const createChatConfig = ({
     // is 'true' and EXPO_PUBLIC_LIVEKIT_URL points at the LiveKit server of the
     // deployment. Needs a dev build: the LiveKit packages are native modules.
     videoCalls: {
-      enabled: VIDEO_CALLS_ENABLED && Boolean(LIVEKIT_URL),
+      enabled: videoCallsEnabled,
       livekitUrl: LIVEKIT_URL,
       allowedRoomTypes: ['private'],
       enableAudioCalls: true,

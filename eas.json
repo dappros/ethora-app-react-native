@@ -50,9 +50,19 @@
         "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "972933470054-ca7eragog9vsiq0kbl7i06ovupakr941.apps.googleusercontent.com"
       },
       "autoIncrement": true
+    },
+    "qa": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_API": "https://api.chat-qa.ethora.com/v1",
+        "EXPO_PUBLIC_API_V2": "https://api.chat-qa.ethora.com/v2",
+        "EXPO_PUBLIC_VIDEO_CALLS_ENABLED": "true",
+        "EXPO_PUBLIC_LIVEKIT_URL": "https://livekit.ethora-qa.com"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "qa": {}
   }
 }
