@@ -55,7 +55,8 @@
           "cameraPermission": "$(PRODUCT_NAME) needs access to your camera so you can be seen during video calls and take photos for chats.",
           "microphonePermission": "$(PRODUCT_NAME) needs access to your microphone for audio and video calls and voice messages."
         }
-      ]
+      ],
+      "./plugins/withAndroidReleaseSigning"
     ],
     "scheme": "ethoraappreactnative",
     "orientation": "portrait",
@@ -91,7 +92,7 @@
         "monochromeImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#7740CA"
       },
-      "package": "com.ethora",
+      "package": "com.ethora.mobile",
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.BLUETOOTH_CONNECT"

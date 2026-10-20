@@ -61,6 +61,9 @@
       "api_key": [
         {
           "current_key": "AIzaSyAubSQUJCOMpPYMdfGon86laeaRrc_AvKM"
+        },
+        {
+          "current_key": "AIzaSyAeX5Sr-fi-dvW6_pnrnrfq6qS86TrdXNU"
         }
       ],
       "services": {
@@ -106,6 +109,49 @@
       "api_key": [
         {
           "current_key": "AIzaSyAubSQUJCOMpPYMdfGon86laeaRrc_AvKM"
+        },
+        {
+          "current_key": "AIzaSyAeX5Sr-fi-dvW6_pnrnrfq6qS86TrdXNU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972933470054-9v5gnseqef8po7cvvrsovj51cte249ov.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "972933470054-ca7eragog9vsiq0kbl7i06ovupakr941.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ethora",
+                "app_store_id": "1574163533"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972933470054:android:551363cf369d38a69cdaa7",
+        "android_client_info": {
+          "package_name": "com.ethora.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972933470054-hbsf29ohpato76til2jtf6jgg1b4374c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAubSQUJCOMpPYMdfGon86laeaRrc_AvKM"
+        },
+        {
+          "current_key": "AIzaSyAeX5Sr-fi-dvW6_pnrnrfq6qS86TrdXNU"
         }
       ],
       "services": {

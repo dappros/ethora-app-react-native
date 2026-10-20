@@ -63,6 +63,14 @@ export const usePushNotifications = (): void => {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
     }).catch(() => {});
+    // Reactions to the user's messages come in silent, the way Telegram
+    // does it; the service sends them with channelId 'reactions'.
+    Notifications.setNotificationChannelAsync('reactions', {
+      name: 'Reactions',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      sound: null,
+      enableVibrate: false,
+    }).catch(() => {});
   }, []);
 
   const handledResponseRef = useRef<string | null>(null);
