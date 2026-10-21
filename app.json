@@ -83,7 +83,10 @@
       },
       "entitlements": {
         "aps-environment": "development"
-      }
+      },
+      "associatedDomains": [
+        "applinks:app.chat.ethora.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -96,6 +99,23 @@
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "app.chat.ethora.com",
+              "pathPrefix": "/call/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "extra": {

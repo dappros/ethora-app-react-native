@@ -2,13 +2,14 @@ import { useEffect, useRef } from 'react';
 import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { handlePushPayload } from '@ethora/chat-component-rn';
+import { handlePushPayload, scheduledCallSlugFromPush } from '@ethora/chat-component-rn';
 import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { syncPushRegistration } from '@modules/push/service/pushService';
 import { useAppIconBadge } from '@modules/push/hooks/useAppIconBadge';
 import { useIncomingCallPushes } from '@modules/push/hooks/useIncomingCallPushes';
 import { payloadOf } from '@modules/push/lib/notificationPayload';
+import { callRoute } from '@modules/calls/scheduledCalls';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -86,6 +87,16 @@ export const usePushNotifications = (): void => {
       handledResponseRef.current = id;
 
       const data = payloadOf(response.notification);
+
+      // The reminder before a scheduled call opens the call's link, the same
+      // route a tapped invite link lands on (app/call/[slug].tsx).
+      const reminderSlug = scheduledCallSlugFromPush(data);
+      if (reminderSlug) {
+        console.log('[push] scheduled call reminder tap →', reminderSlug);
+        router.navigate(callRoute(reminderSlug));
+        return;
+      }
+
       const outcome = handlePushPayload(data);
       console.log('[push] notification tap →', outcome, data.jid ?? '');
       router.replace('/(app)/chat');
