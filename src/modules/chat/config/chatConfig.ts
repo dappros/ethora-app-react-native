@@ -116,6 +116,9 @@ export const createChatConfig = ({
     // (WhatsApp-style "Messages" section). The archive it queries is scoped
     // by app, so the library needs the appId alongside the flag.
     enableMessageSearch: true,
+    // Voice messages: the microphone in the composer (opt-in in the library).
+    // The permission text comes from the expo-audio plugin in app.json.
+    enableAudio: true,
     appId: currentUser?.appId,
     // 1:1 audio/video calls over LiveKit, same settings as the web app
     // (ethora-app-reactjs chatBootstrap.ts). Off unless EXPO_PUBLIC_VIDEO_CALLS_ENABLED
