@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@config-plugins/react-native-webrtc": "^15.0.2",
-    "@ethora/chat-component-rn": "26.10.9",
+    "@ethora/chat-component-rn": "26.10.10",
     "@expo/vector-icons": "^15.0.2",
     "@livekit/react-native": "^3.0.0",
     "@livekit/react-native-expo-plugin": "^1.0.3",
