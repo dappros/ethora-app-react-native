@@ -150,6 +150,33 @@ push to while offline. The SDK's own `usePushNotifications` is **not mounted** (
 legacy `push.<domain>/api/v1/subscriptions` contract), so token handling is the host's job — this module.
 Customers' host apps that embed the component must implement the same.
 
+## 5b. Sender avatar in message pushes
+
+Chat pushes show the sender's avatar the way messengers do: the avatar next to the text, the app
+icon as the small badge. Switched per app on the server, like the content mode (name vs "New
+message"): `PUT api.<domain>/v1/push/sender-avatar/{appId}` with `{ "enabled": false | true }`,
+`GET` returns `{ enabled }`; on by default. Off, the push service sends no `image`, and both
+platforms show the plain notification. The `generic` content mode never sends one. Contract:
+ethora-backend `services/push/README.md`, "Sender avatar".
+
+- The avatar is the message's `photo` / `photoURL` (`<data>` of the stanza), else the sender's
+  `profileImage` (the push worker looks it up by `senderJID`).
+- iOS: the SDK's notification service extension downloads it and turns the push into a
+  communication notification (`INSendMessageIntent`, sender as `INPerson`). The SDK config plugin
+  adds the `com.apple.developer.usernotifications.communication` entitlement and
+  `INSendMessageIntent` to `NSUserActivityTypes`; needs `npx expo prebuild` + pod install. Xcode's
+  automatic signing / EAS turn the capability on for the App ID; with manual profiles switch on
+  "Communication Notifications" in the developer portal.
+- Android: our pushes are sealed (data-only), drawn by the SDK task through expo-notifications,
+  which has no per-notification avatar. `registerSealedPushTask({ onMessageShown })`
+  (`src/modules/push/sealedPushTask.ts`) calls `modules/ethora-message-notification`, which takes
+  the notification expo just posted (tag = room JID) back with `recoverBuilder` (same tap intent and
+  channel) and reposts it as MessagingStyle with the sender as a Person carrying the round avatar,
+  without a second sound, plus a long-lived conversation shortcut per chat (Android 11+ draws a
+  conversation notification only with one). Avatars are cached for a day in
+  `cacheDir/push-avatars`. Below Android 9 the avatar is the large icon. A plain push (encryption
+  off in app.json) is drawn by the system and only shows the avatar as the large picture.
+
 ## 5a. Incoming calls by push (iOS VoIP, Android call notification)
 
 Added 2026-10-20. Calls ring through the XMPP `call-token` stanza only while the socket is up; with the
