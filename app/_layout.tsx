@@ -34,11 +34,14 @@ function AuthGate() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        await auth.check().catch((error) => console.log('Auth check error:', error));
 
         const savedWorkspace = await restoreDomain();
         if (savedWorkspace) {
-          await geConfigApp(savedWorkspace);
+          await geConfigApp(savedWorkspace).catch((error) => console.log('Config restore error:', error));
+        }
+
+        if (await tokenStorage.getAccessToken()) {
+          await auth.check().catch((error) => console.log('Auth check error:', error));
         }
       } catch (error) {
         console.log('Initialization error:', error);

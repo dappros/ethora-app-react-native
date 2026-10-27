@@ -115,8 +115,11 @@ export function attachCommonInterceptors(instance: AxiosInstance, version: 'v1' 
         original.headers = original.headers ?? {};
         original.headers.Authorization = `Bearer ${token}`;
         return instance.request(original);
-      } catch (e) {
-        await tokenStorage.clear();
+      } catch (e: any) {
+        const refreshStatus = e?.response?.status;
+        if (refreshStatus === 401 || refreshStatus === 403 || e?.message === 'No refresh token') {
+          await tokenStorage.clear();
+        }
         return Promise.reject(e);
       }
     }
