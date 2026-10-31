@@ -17,6 +17,20 @@ export const setAppIconBadge = async (count: number): Promise<void> => {
 export const clearAppIconBadge = (): Promise<void> => setAppIconBadge(0);
 
 /**
+ * Signed out: nothing of the previous session may stay on the device — no
+ * badge and no delivered pushes in the shade / Notification Center.
+ * Best effort, never throws.
+ */
+export const clearAppNotifications = async (): Promise<void> => {
+  try {
+    await Notifications.dismissAllNotificationsAsync();
+  } catch {
+    // decoration only
+  }
+  await clearAppIconBadge();
+};
+
+/**
  * Removes the delivered pushes of chats that have nothing unread any more.
  * On Android the launcher counts the notifications in the shade (the push
  * carries the server's total as notificationCount), so a read chat whose push

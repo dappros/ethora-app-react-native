@@ -1,11 +1,12 @@
 import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 import { ensurePushKeyPair } from '@ethora/chat-component-rn';
 import {
   registerPushToken,
   unregisterPushToken,
   unregisterPushTokenLegacy,
 } from '@modules/push/fetch';
-import { pushStorage } from '@modules/push/lib/pushStorage';
+import { pushStorage, voipPushStorage } from '@modules/push/lib/pushStorage';
 import { ensurePushPermission, getNativePushToken } from '@modules/push/service/pushToken';
 import { dropVoipRegistration } from '@modules/push/service/voipPushService';
 import { PushBuildOrigin, PushRegistrationRecord, RegisterPushTokenPayload } from '@modules/push/types';
@@ -172,5 +173,24 @@ export const dropPushRegistration = async (): Promise<void> => {
     await pushStorage.clear();
   } catch {
     // never block logout on push cleanup
+  }
+};
+
+/**
+ * The session ended without a logout (expired, revoked): the backend can no
+ * longer be asked to drop the registrations — the DELETE needs the dead
+ * token — so try it anyway, then also cut the device off at APNs / FCM so
+ * no push of the old session reaches it. The next login gets a token again
+ * (getNativePushToken registers anew). No-op when this device had nothing
+ * registered. Best effort, never throws.
+ */
+export const discardStalePushRegistration = async (): Promise<void> => {
+  try {
+    const [record, voip] = await Promise.all([pushStorage.get(), voipPushStorage.get()]);
+    if (!record && !voip) return;
+    await dropPushRegistration();
+    await Notifications.unregisterForNotificationsAsync();
+  } catch {
+    // never block the sign-in screen on push cleanup
   }
 };

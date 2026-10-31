@@ -18,7 +18,7 @@ export interface CreateChatConfigOptions {
   refresh: () => Promise<AuthRefreshResponse>;
   /** Extra element in the chat header (config.chatHeaderAdditional) */
   headerAdditional?: () => ReactNode;
-  /** Called after the full chat teardown (config.logout.onAfterLogout): host auth reset */
+  /** Called after the full chat teardown (config.logout.onAfterLogout): the host side of logout (useAuth.finishLogout) */
   onAfterLogout?: () => Promise<void> | void;
   /**
    * The chat's own appearance (Settings → Appearance), as the user picks it and on restore:

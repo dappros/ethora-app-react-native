@@ -96,7 +96,8 @@ export const createChatConfig = ({
     defaultRooms: app?.defaultRooms || [],
     chatHeaderAdditional: headerAdditional ? { enabled: true, element: headerAdditional } : undefined,
     // "Sign out" item in the room-list right menu: the library performs performLogout itself,
-    // then calls onAfterLogout — we reset the auth store there and (app)/_layout redirects to /login.
+    // then calls onAfterLogout — useAuth.finishLogout drops the push registrations, clears the badge
+    // and resets the auth store there, and (app)/_layout redirects to /login.
     // No label/confirm copy here: the library's own follows the app language.
     logout: {
       enabled: true,

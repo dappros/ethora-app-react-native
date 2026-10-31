@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { logoutService } from "@ethora/chat-component-rn";
 // Service import (not the @modules/push barrel): the barrel re-exports usePushNotifications, which imports useAuth → cycle
 import { dropPushRegistration } from "@modules/push/service/pushService";
-import { clearAppIconBadge } from "@modules/push/service/appIconBadge";
+import { clearAppNotifications } from "@modules/push/service/appIconBadge";
 import { signOutGoogle } from "@modules/auth/lib/googleSignIn";
 import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
@@ -50,16 +50,22 @@ export const useAuth = (): UseAuthReturn => {
     return dispatch(authCheckRequest()).unwrap();
   }, [dispatch]);
 
-  // Unregister the push token first (the DELETE needs the still-valid auth token),
-  // then full chat teardown (XMPP, component store and AsyncStorage), then reset auth.
-  // dropPushRegistration and performLogout never throw — they log errors themselves.
-  const logout = useCallback(async () => {
+  // Everything of the session that lives outside the chat: the push
+  // registrations (the DELETE needs the still-valid auth token, so before
+  // authLogout clears it), Google, the badge and delivered pushes, the auth store.
+  // None of these throw — they log errors themselves.
+  const finishLogout = useCallback(async () => {
     await dropPushRegistration();
     await signOutGoogle();
-    await logoutService.performLogout();
-    await clearAppIconBadge();
+    await clearAppNotifications();
     dispatch(authSlice.actions.authLogout());
   }, [dispatch]);
+
+  // Full logout: chat teardown (XMPP, component store and AsyncStorage), then the rest.
+  const logout = useCallback(async () => {
+    await logoutService.performLogout();
+    await finishLogout();
+  }, [finishLogout]);
 
   const refresh = useCallback(() => {
     return dispatch(autRefreshRequest()).unwrap();
@@ -77,6 +83,7 @@ export const useAuth = (): UseAuthReturn => {
     register,
     check,
     logout,
+    finishLogout,
     refresh,
     eventToken,
   };

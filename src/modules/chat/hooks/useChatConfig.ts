@@ -1,6 +1,4 @@
-import { useCallback, useMemo } from 'react';
-import { useAppDispatch } from '@/src/store';
-import { authSlice } from '@modules/auth/store';
+import { useMemo } from 'react';
 import { useAuth } from '@modules/auth/hooks';
 import { useConfig } from '@modules/config/hooks';
 import { createChatConfig } from '@modules/chat/config/chatConfig';
@@ -14,14 +12,13 @@ export interface UseChatConfigOptions {
 
 export const useChatConfig = ({ onThemeChange }: UseChatConfigOptions = {}): ChatConfig => {
   const { configApp, domain } = useConfig();
-  const { user, token, refreshToken, refresh } = useAuth();
-  const dispatch = useAppDispatch();
+  const { user, token, refreshToken, refresh, finishLogout } = useAuth();
   const dark = useIsDarkTheme();
 
-  // The chat already ran performLogout — only the host auth (tokens + store) is left to reset
-  const onAfterLogout = useCallback(() => {
-    dispatch(authSlice.actions.authLogout());
-  }, [dispatch]);
+  // The chat already ran performLogout — what is left is the host side: the
+  // push registrations (else pushes keep coming after "Sign out"), the badge,
+  // Google and the auth store
+  const onAfterLogout = finishLogout;
 
   const userId = user?._id;
   const xmppUsername = user?.xmppUsername;
