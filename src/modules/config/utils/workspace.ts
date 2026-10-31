@@ -1,4 +1,9 @@
-import { DEFAULT_API_DOMAIN } from '@modules/config/constants';
+import {
+  DEFAULT_API_DOMAIN,
+  DEFAULT_DOMAIN_NAME,
+  OPEN_WORKSPACE_ADDRESS,
+  OPEN_WORKSPACE_ALIASES,
+} from '@modules/config/constants';
 import { Workspace } from '@modules/config/types';
 
 const HOST_LABEL = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
@@ -30,6 +35,27 @@ export const parseWorkspaceUrl = (input: string): Workspace | null => {
   if (labels.length < 3) return null;
 
   return { domainName: labels[0], domain: labels.slice(1).join('.') };
+};
+
+/** The open Ethora workspace (OPEN_WORKSPACE_ADDRESS). */
+export const openWorkspace = (): Workspace =>
+  parseWorkspaceUrl(OPEN_WORKSPACE_ADDRESS) ?? { domainName: DEFAULT_DOMAIN_NAME, domain: DEFAULT_API_DOMAIN };
+
+const sameWorkspace = (a: Workspace, b: Workspace | null) =>
+  !!b && a.domainName === b.domainName && a.domain === b.domain;
+
+/**
+ * parseWorkspaceUrl for the workspace screen: the open workspace's own address
+ * and its aliases (OPEN_WORKSPACE_ALIASES) all lead to the open workspace.
+ */
+export const resolveWorkspace = (input: string): Workspace | null => {
+  const workspace = parseWorkspaceUrl(input);
+  if (!workspace) return null;
+  const open = openWorkspace();
+  const isOpen =
+    sameWorkspace(workspace, open) ||
+    OPEN_WORKSPACE_ALIASES.some((alias) => sameWorkspace(workspace, parseWorkspaceUrl(alias)));
+  return isOpen ? open : workspace;
 };
 
 export const apiBaseUrl = (domain: string, version: 'v1' | 'v2' = 'v1') =>

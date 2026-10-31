@@ -14,8 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loginScreenBackgroundImage, logoPath } from '@/src/core/docs/config';
 import { Button, ConfirmModal, TextField } from '@/src/core/components';
 import { useConfig } from '@/src/modules/config/hooks';
-import { DEFAULT_API_DOMAIN, DEFAULT_DOMAIN_NAME } from '@/src/modules/config/constants';
-import { parseWorkspaceUrl } from '@/src/modules/config/utils/workspace';
+import { openWorkspace, resolveWorkspace } from '@/src/modules/config/utils/workspace';
 import { Workspace } from '@/src/modules/config/types';
 import { useResponsive } from '@/src/core/hooks';
 
@@ -32,7 +31,8 @@ export default function Domain() {
   const isSubmitting = status === 'loading';
   // Input: workspace address, e.g. example.chat.ethora.com
   // → domainName=example, domain=chat.ethora.com → https://api.chat.ethora.com/v1/apps/get-config?domainName=example
-  const workspace = parseWorkspaceUrl(domainName);
+  // The open workspace's address and its aliases lead to the open workspace (EXPO_PUBLIC_OPEN_WORKSPACE*)
+  const workspace = resolveWorkspace(domainName);
   const hasInput = domainName.trim().length > 0;
 
   const loadConfig = async (target: Workspace) => {
@@ -57,7 +57,7 @@ export default function Domain() {
   const onBaseAppConfirm = async () => {
     // Close the modal first for the same reason as the keyboard above.
     setBaseAppConfirmOpen(false);
-    await loadConfig({ domainName: DEFAULT_DOMAIN_NAME, domain: DEFAULT_API_DOMAIN });
+    await loadConfig(openWorkspace());
   };
 
   return (
