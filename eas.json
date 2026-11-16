@@ -56,6 +56,11 @@
       "env": {
         "EXPO_PUBLIC_API": "https://api.chat-qa.ethora.com/v1",
         "EXPO_PUBLIC_API_V2": "https://api.chat-qa.ethora.com/v2",
+        "EXPO_PUBLIC_OPEN_WORKSPACE": "app.chat-qa.ethora.com",
+        "EXPO_PUBLIC_OPEN_WORKSPACE_ALIASES": "app.chat.ethora.com",
+        "EXPO_PUBLIC_APP_XMPP_SERVICE": "xmpp.chat-qa.ethora.com",
+        "EXPO_PUBLIC_XMPP_SERVICE": "conference.xmpp.chat-qa.ethora.com",
+        "EXPO_PUBLIC_XMPP_HOST": "xmpp.chat-qa.ethora.com",
         "EXPO_PUBLIC_VIDEO_CALLS_ENABLED": "true",
         "EXPO_PUBLIC_LIVEKIT_URL": "https://livekit.ethora-qa.com"
       }

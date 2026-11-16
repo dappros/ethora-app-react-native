@@ -1,4 +1,4 @@
-import { View, Text, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -12,6 +12,7 @@ import {
 } from '@/src/modules/auth/components';
 import { ConfirmModal } from '@/src/core/components';
 import { useAppBranding, useConfig } from '@/src/modules/config/hooks';
+import { AppLogo } from '@/src/modules/config/components';
 import { useResponsive } from '@/src/core/hooks';
 
 export default function Login() {
@@ -64,11 +65,8 @@ export default function Login() {
         >
           {/* Base app on phones — small logo on the left; otherwise the logo is below */}
           {logoInHeader ? (
-            <Image
-              alt="App logo"
-              accessibilityLabel="App logo"
+            <AppLogo
               source={logoSource}
-              resizeMode="contain"
               style={{ width: 78, height: 75 }}
             />
           ) : (
@@ -93,11 +91,8 @@ export default function Login() {
           style={{ justifyContent: isTablet ? 'center' : 'space-between' }}
         >
           {!logoInHeader ? (
-            <Image
-              alt="App logo"
-              accessibilityLabel="App logo"
+            <AppLogo
               source={logoSource}
-              resizeMode="contain"
               style={
                 isBaseApp
                   ? { width: 78, height: 75, marginBottom: 56 }

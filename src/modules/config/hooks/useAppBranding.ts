@@ -55,8 +55,12 @@ export const useAppBranding = (): AppBranding => {
   return useMemo(() => {
     const isBaseApp = status !== 'success' || config.isBaseApp !== false;
     const displayName = (!isBaseApp && config.displayName) || 'Ethora';
-    const logoSource: ImageSourcePropType =
-      !isBaseApp && config.logoImage ? { uri: config.logoImage } : logoPath;
+    // Base app — the Ethora logo; custom app — its logoImage, without one null (AppLogo draws YouLogo)
+    const logoSource: ImageSourcePropType | null = isBaseApp
+      ? logoPath
+      : config.logoImage
+        ? { uri: config.logoImage }
+        : null;
 
     const primary = (!isBaseApp && config.primaryColor) || DEFAULT_PRIMARY;
 

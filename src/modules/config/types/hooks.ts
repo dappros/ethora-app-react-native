@@ -25,6 +25,7 @@ export interface AppBrandingTheme {
 export interface AppBranding {
   isBaseApp: boolean;
   displayName: string;
-  logoSource: ImageSourcePropType;
+  /** null — custom app without logoImage, render the default YouLogo (AppLogo) */
+  logoSource: ImageSourcePropType | null;
   theme: AppBrandingTheme;
 }
