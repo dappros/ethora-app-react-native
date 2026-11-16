@@ -9,7 +9,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
@@ -230,7 +229,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                     paddingBottom: 20 + (Platform.OS === 'android' ? insets.bottom : 0),
                   },
                 ]}>
-                <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                <View>
                   <View style={styles.form}>
                     <Text style={[styles.title, { color: primary }]}>Hello again!</Text>
 
@@ -300,7 +299,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                       </>
                     )}
                   </View>
-                </TouchableWithoutFeedback>
+                </View>
               </ScrollView>
             </Animated.View>
           </GestureDetector>
