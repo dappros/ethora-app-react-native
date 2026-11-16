@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/src/modules/auth/hooks";
+import { normalizeEmail, validateEmail } from "@/src/modules/auth/lib/email";
 import { useAppBranding } from "@/src/modules/config/hooks";
 import { useAppColors } from "@/src/core/theme";
 import { AUTH_CONTENT_MAX_WIDTH } from "@/src/core/hooks";
@@ -149,7 +150,12 @@ export default function Register() {
     }
   };
 
-  const onSubmit = async ({ firstName, lastName, email, password }: Form) => {
+  const onSubmit = async (form: Form) => {
+    // Pasted values often carry a space or an invisible character
+    const firstName = form.firstName.trim();
+    const lastName = form.lastName.trim();
+    const email = normalizeEmail(form.email);
+    const { password } = form;
     const suggested = suggestEmail(email);
     if (suggested && suggested !== email) {
       setEmailSuggestion(suggested);
@@ -168,8 +174,6 @@ export default function Register() {
         });
         return;
       }
-
-      console.log("register", { firstName, lastName, email, password, cfToken: turnstileToken });
 
       const utm = "mobile-app";
       
@@ -256,7 +260,7 @@ export default function Register() {
                 keyboardType="email-address"
                 rules={{
                   required: 'Email is required',
-                  pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' },
+                  validate: validateEmail,
                 }}
                 left={<Ionicons name="mail-outline" size={20} color={primary} />}
                 accentColor={primary}

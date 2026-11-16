@@ -7,15 +7,18 @@ import {
 import { Workspace } from '@modules/config/types';
 
 const HOST_LABEL = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+/** Whitespace and zero-width characters a copied address may carry; a host has none of them. */
+const ADDRESS_JUNK = /[\s​-‍⁠﻿]/g;
 
 /**
  * Parses a workspace address: `example.chat.ethora.com`
  * → { domainName: 'example', domain: 'chat.ethora.com' }.
- * Scheme, path, port and query are dropped. A single word (`example`) is treated as
- * a domainName in the default cluster. Returns null when the string is invalid.
+ * Spaces (anywhere) and invisible characters, scheme, path, port and query are dropped.
+ * A single word (`example`) is treated as a domainName in the default cluster.
+ * Returns null when the string is invalid.
  */
 export const parseWorkspaceUrl = (input: string): Workspace | null => {
-  let host = input.trim().toLowerCase();
+  let host = (input ?? '').replace(ADDRESS_JUNK, '').toLowerCase();
   if (!host) return null;
 
   host = host.replace(/^[a-z]+:\/\//, ''); // scheme

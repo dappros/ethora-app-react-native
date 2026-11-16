@@ -28,6 +28,7 @@ import { useForm } from 'react-hook-form';
 import { FormTextField } from '@/src/core/components';
 import { GoogleSignInButton, useGoogleSignInAvailable } from '../GoogleSignInButton';
 import { useAuth } from '@modules/auth/hooks';
+import { normalizeEmail, validateEmail } from '@modules/auth/lib/email';
 import { useAppBranding } from '@modules/config/hooks';
 import { useAppColors } from '@/src/core/theme';
 import { AUTH_CONTENT_MAX_WIDTH, useResponsive } from '@/src/core/hooks';
@@ -154,7 +155,9 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
       }
     });
 
-  const onSubmit = async ({ email, password }: Form) => {
+  const onSubmit = async ({ email: rawEmail, password }: Form) => {
+    // A pasted email often carries a space or an invisible character
+    const email = normalizeEmail(rawEmail);
     if (!email || !password) return;
 
     clearErrors();
@@ -241,7 +244,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                       keyboardType="email-address"
                       rules={{
                         required: 'Email is required',
-                        pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' },
+                        validate: validateEmail,
                       }}
                       left={<Ionicons name="mail-outline" size={20} color={primary} />}
                       accentColor={primary}
