@@ -27,6 +27,7 @@ import Animated, {
 import { useForm } from 'react-hook-form';
 import { FormTextField } from '@/src/core/components';
 import { GoogleSignInButton, useGoogleSignInAvailable } from '../GoogleSignInButton';
+import { AppleSignInButton, useAppleSignInAvailable } from '../AppleSignInButton';
 import { useAuth } from '@modules/auth/hooks';
 import { normalizeEmail, validateEmail } from '@modules/auth/lib/email';
 import { useAppBranding } from '@modules/config/hooks';
@@ -54,6 +55,7 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
   const primary = theme.primary;
   const colors = useAppColors();
   const googleAvailable = useGoogleSignInAvailable();
+  const appleAvailable = useAppleSignInAvailable();
   const {
     control,
     handleSubmit,
@@ -291,9 +293,10 @@ export const RegularLoginModal: FC<RegularLoginModalProps> = ({ isOpen, onClose,
                       <Text style={styles.primaryBtnText}>Log in</Text>
                     </TouchableOpacity>
 
-                    {!keyboardOpen && googleAvailable && (
+                    {!keyboardOpen && (googleAvailable || appleAvailable) && (
                       <>
                         <Text style={[styles.or, { color: primary }]}>or</Text>
+                        <AppleSignInButton />
                         <GoogleSignInButton
                           backgroundColor={primary}
                           textColor="#fff"

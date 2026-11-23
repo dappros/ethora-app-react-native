@@ -27,7 +27,7 @@ export const authRefresh = async (): Promise<AxiosResponse<AuthRefreshResponse>>
   });
 };
 
-// ----- social (Google) — mirrors the web flow in ethora-app-reactjs/src/pages/AuthPage/GoogleButton.tsx
+// ----- social (Google, Apple) — mirrors the web flow in ethora-app-reactjs/src/pages/AuthPage/GoogleButton.tsx
 
 export const authCheckEmail = (email: string, appId: string): Promise<AxiosResponse<AuthCheckEmailResponse>> => {
   return $api.get<AuthCheckEmailResponse>(`/users/checkEmail/${encodeURIComponent(email)}`, {

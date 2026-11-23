@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useAppColors } from '@/src/core/theme';
 import { discardStalePushRegistration } from '@/src/modules/push/service/pushService';
 import { clearAppNotifications } from '@/src/modules/push/service/appIconBadge';
+import { loadTermsAcceptance } from '@/src/modules/legal/termsAcceptance';
 
 if (__DEV__) {
   LogBox.ignoreAllLogs();
@@ -98,7 +99,7 @@ function AuthGate() {
       try {
         await untilForeground();
 
-        const savedWorkspace = await restoreDomain();
+        const [savedWorkspace] = await Promise.all([restoreDomain(), loadTermsAcceptance()]);
         if (savedWorkspace) {
           await geConfigApp(savedWorkspace).catch((error) => console.log('Config restore error:', error));
         }

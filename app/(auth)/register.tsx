@@ -3,7 +3,12 @@ import { View, Text, TouchableOpacity, ImageBackground, StyleSheet, ActivityIndi
 import { transparentScreenBackgroundImage } from '@/src/core/docs/config';
 import { Button, FormTextField } from "@/src/core/components";
 import { getTurnstileToken } from "@/src/core/captcha/getTurnstileToken";
-import { GoogleSignInButton, useGoogleSignInAvailable } from "@/src/modules/auth/components";
+import {
+  AppleSignInButton,
+  GoogleSignInButton,
+  useAppleSignInAvailable,
+  useGoogleSignInAvailable,
+} from "@/src/modules/auth/components";
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -25,6 +30,7 @@ export default function Register() {
   const primary = theme.primary;
   const colors = useAppColors();
   const googleAvailable = useGoogleSignInAvailable();
+  const appleAvailable = useAppleSignInAvailable();
   const showBrandBackground = isBaseApp;
   const [showPassword, setShowPassword] = useState(false);
   const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
@@ -370,9 +376,10 @@ export default function Register() {
               color={showBrandBackground ? undefined : primary}
               />
 
-              {googleAvailable && (
+              {(googleAvailable || appleAvailable) && (
                 <>
                   <Text style={[styles.or, { color: primary }]}>or</Text>
+                  <AppleSignInButton />
                   <GoogleSignInButton
                     backgroundColor={primary}
                     textColor="#fff"

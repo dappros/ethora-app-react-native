@@ -107,7 +107,8 @@ export const createChatConfig = ({
     enableRoomsRetry: { enabled: false, helperText: '' },
     inAppNotifications: { enabled: true, showInContext: true },
     eventHandlers: onThemeChange ? { onThemeChange } : undefined,
-    e2ee: { enabled: true },
+    // Off for now because of App Store encryption rules, see docs/app-store-compliance.md.
+    e2ee: { enabled: false },
     // Settings → Language: the interface language (user.appLanguage) and the
     // language messages are translated into (user.chatLanguage), both kept on
     // the profile. Translation itself is the server's, shown inline ("auto").
@@ -117,6 +118,10 @@ export const createChatConfig = ({
     // (WhatsApp-style "Messages" section). The archive it queries is scoped
     // by app, so the library needs the appId alongside the flag.
     enableMessageSearch: true,
+    // App Review 1.2, both off by default in the library:
+    // report = "Report" in the chat menu, chat profile and list swipe (/v1/chats/reports);
+    // userBlock = "Block user" on profiles and private chats, Settings → Blocked users (/v1/chats/blocked).
+    features: { report: true, userBlock: true },
     // Voice messages: the microphone in the composer (opt-in in the library).
     // The permission text comes from the expo-audio plugin in app.json.
     enableAudio: true,

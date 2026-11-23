@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
+  authAppleLoginRequest,
   authCheckRequest,
   authGoogleLoginRequest,
   authLoginRequest,
@@ -59,30 +60,33 @@ export const authSlice = createSlice({
       state.status = 'error';
     });
 
-    // GOOGLE LOGIN________________
-    builder.addCase(authGoogleLoginRequest.pending, (state) => {
-      state.status = 'loading';
-    });
-
-    builder.addCase(authGoogleLoginRequest.fulfilled, (state, { payload }) => {
-      state.status = 'success';
-      state.checked = true;
-      state.token = payload.token;
-      state.refreshToken = payload.refreshToken;
-      state.user = payload.user;
-
-      tokenStorage.setAll({
-        token: payload.token,
-        refreshToken: payload.refreshToken,
-        wsToken: payload.wsToken,
+    // GOOGLE / APPLE LOGIN________________
+    for (const socialLogin of [authGoogleLoginRequest, authAppleLoginRequest]) {
+      builder.addCase(socialLogin.pending, (state) => {
+        state.status = 'loading';
       });
-    });
 
-    builder.addCase(authGoogleLoginRequest.rejected, (state, { payload, error }) => {
-      console.log('payload', payload ?? error);
-      // A dismissed Google sheet is not an auth error
-      state.status = error?.name === 'GoogleSignInCancelled' ? 'unset' : 'error';
-    });
+      builder.addCase(socialLogin.fulfilled, (state, { payload }) => {
+        state.status = 'success';
+        state.checked = true;
+        state.token = payload.token;
+        state.refreshToken = payload.refreshToken;
+        state.user = payload.user;
+
+        tokenStorage.setAll({
+          token: payload.token,
+          refreshToken: payload.refreshToken,
+          wsToken: payload.wsToken,
+        });
+      });
+
+      builder.addCase(socialLogin.rejected, (state, { payload, error }) => {
+        console.log('payload', payload ?? error);
+        // A dismissed Google / Apple sheet is not an auth error
+        const cancelled = error?.name === 'GoogleSignInCancelled' || error?.name === 'AppleSignInCancelled';
+        state.status = cancelled ? 'unset' : 'error';
+      });
+    }
 
     // REGISTRATION________________
     builder.addCase(authRegistrationRequest.pending, (state) => {

@@ -47,7 +47,7 @@ export const GoogleSignInButton = ({
       if (error?.name === 'GoogleSignInCancelled') return;
       console.log('Google sign-in error:', error);
       const message =
-        error?.name === 'GoogleRegistrationClosed'
+        error?.name === 'SocialRegistrationClosed'
           ? 'There is no account for this Google email and registration is closed for this workspace.'
           : error?.response?.data?.error ||
             error?.response?.data?.message ||

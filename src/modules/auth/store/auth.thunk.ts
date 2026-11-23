@@ -9,16 +9,36 @@ import {
   authSocialRegister,
 } from '@modules/auth/fetch/auth.fetch';
 import { getGoogleCredentials } from '@modules/auth/lib/googleSignIn';
+import { getAppleCredentials } from '@modules/auth/lib/appleSignIn';
 import { ENV_FIREBASE_CONFIG } from '@modules/config/utils/firebaseConfig';
-import { AuthLoginFetchDataValue, AuthRefreshResponse, AuthRegistrationFetchDataValue, AuthResponse } from '@modules/auth/types';
+import {
+  AuthLoginFetchDataValue,
+  AuthRefreshResponse,
+  AuthRegistrationFetchDataValue,
+  AuthResponse,
+  AuthSocialFetchDataValue,
+} from '@modules/auth/types';
 import { BaseAsyncThunkOptions } from '@core/types';
 
-export class GoogleRegistrationClosed extends Error {
+/** A new Google / Apple user in a workspace that does not take sign-ups */
+export class SocialRegistrationClosed extends Error {
   constructor() {
     super('Registration is closed for this workspace');
-    this.name = 'GoogleRegistrationClosed';
+    this.name = 'SocialRegistrationClosed';
   }
 }
+
+/** success: true from checkEmail → the email is free → the social user must be registered first */
+const isNewSocialUser = async (email: string, appId: string): Promise<boolean> => {
+  try {
+    return Boolean((await authCheckEmail(email, appId)).data.success);
+  } catch (error: any) {
+    const alreadyExists =
+      error?.response?.status === 422 && error?.response?.data?.code === 'EMAIL_ALREADY_EXISTS';
+    if (alreadyExists) return false;
+    throw error;
+  }
+};
 
 export const authLoginRequest = createAsyncThunk<
   AuthResponse,
@@ -74,17 +94,14 @@ export const authGoogleLoginRequest = createAsyncThunk<
     const { email, firebaseIdToken, googleAccessToken } = await getGoogleCredentials(firebaseConfig);
     const social = { idToken: firebaseIdToken, accessToken: googleAccessToken, loginType: 'google' as const };
 
-    // success: true → the email is free → register first
     let shouldRegister = false;
     try {
-      shouldRegister = Boolean((await authCheckEmail(email, app._id)).data.success);
-    } catch (error: any) {
-      const alreadyExists =
-        error?.response?.status === 422 && error?.response?.data?.code === 'EMAIL_ALREADY_EXISTS';
-      if (!alreadyExists) return thunkApi.rejectWithValue(error);
+      shouldRegister = await isNewSocialUser(email, app._id);
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
     }
 
-    if (shouldRegister && app.userRegistrationDisabled) throw new GoogleRegistrationClosed();
+    if (shouldRegister && app.userRegistrationDisabled) throw new SocialRegistrationClosed();
 
     try {
       if (shouldRegister) {
@@ -92,6 +109,54 @@ export const authGoogleLoginRequest = createAsyncThunk<
         if (!registered.data?.user) throw new Error('Social registration failed');
       }
       const response = await authSocialLogin(social);
+
+      return response.data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+
+/**
+ * Sign in with Apple: Apple identity token → checkEmail → (register as a new social user) →
+ * social login, the same steps as Google. Cancel is thrown as-is (AppleSignInCancelled).
+ */
+export const authAppleLoginRequest = createAsyncThunk<
+  AuthResponse,
+  { utm?: string } | undefined,
+  BaseAsyncThunkOptions
+>(
+  'auth/login-with-apple',
+  async (data, thunkApi) => {
+    const app = thunkApi.getState().config.config;
+    const { email, identityToken, authorizationCode, firstName, lastName } = await getAppleCredentials();
+
+    let shouldRegister = false;
+    try {
+      shouldRegister = await isNewSocialUser(email, app._id);
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+
+    if (shouldRegister && app.userRegistrationDisabled) throw new SocialRegistrationClosed();
+
+    try {
+      if (shouldRegister) {
+        const registration: AuthSocialFetchDataValue = {
+          loginType: 'apple',
+          authToken: identityToken,
+          utm: data?.utm,
+          // No name (Apple shares it on the first sign-in only): the backend falls back to the email
+          ...(firstName ? { firstName, lastName } : {}),
+        };
+        const registered = await authSocialRegister(registration);
+        if (!registered.data?.user) throw new Error('Social registration failed');
+      }
+      const response = await authSocialLogin({
+        loginType: 'apple',
+        authToken: identityToken,
+        ...(authorizationCode ? { authorizationCode } : {}),
+      });
 
       return response.data;
     } catch (error) {

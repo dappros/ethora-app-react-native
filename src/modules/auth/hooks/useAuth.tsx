@@ -7,6 +7,7 @@ import { clearAppNotifications } from "@modules/push/service/appIconBadge";
 import { signOutGoogle } from "@modules/auth/lib/googleSignIn";
 import { UseAuthReturn, AuthLoginFetchDataValue, AuthRegistrationFetchDataValue } from "@modules/auth/types";
 import {
+  authAppleLoginRequest,
   authCheckRequest,
   authGoogleLoginRequest,
   authLoginRequest,
@@ -35,6 +36,13 @@ export const useAuth = (): UseAuthReturn => {
   const loginWithGoogle = useCallback(
     (value?: { utm?: string }) => {
       return dispatch(authGoogleLoginRequest(value)).unwrap();
+    },
+    [dispatch]
+  );
+
+  const loginWithApple = useCallback(
+    (value?: { utm?: string }) => {
+      return dispatch(authAppleLoginRequest(value)).unwrap();
     },
     [dispatch]
   );
@@ -80,6 +88,7 @@ export const useAuth = (): UseAuthReturn => {
     rememberMe,
     login,
     loginWithGoogle,
+    loginWithApple,
     register,
     check,
     logout,

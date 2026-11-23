@@ -61,7 +61,7 @@ export interface AuthRefreshResponse {
 }
 
 /** Social (Google) auth, same contract as ethora-app-reactjs/src/http.ts httpLoginSocial / httpRegisterSocial */
-export interface AuthSocialFetchDataValue {
+export interface AuthGoogleFetchDataValue {
   /** Firebase ID token of the signed-in Firebase user — the backend verifies this one */
   idToken: string;
   /** Provider (Google) OAuth access token */
@@ -71,6 +71,21 @@ export interface AuthSocialFetchDataValue {
   signupPlan?: string;
   utm?: string;
 }
+
+/** Sign in with Apple: the backend verifies `authToken` (the Apple identity token) */
+export interface AuthAppleFetchDataValue {
+  loginType: 'apple';
+  authToken: string;
+  /** Login only: one-time code the backend exchanges for a token it revokes on account deletion */
+  authorizationCode?: string;
+  /** Registration only: Apple shares the name once, the token does not carry it */
+  firstName?: string;
+  lastName?: string;
+  signupPlan?: string;
+  utm?: string;
+}
+
+export type AuthSocialFetchDataValue = AuthGoogleFetchDataValue | AuthAppleFetchDataValue;
 
 /** GET /users/checkEmail/:email → success: true means the email is free (registration needed) */
 export interface AuthCheckEmailResponse {

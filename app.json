@@ -11,7 +11,12 @@
     },
     "plugins": [
       "expo-dev-client",
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       "expo-web-browser",
       [
         "expo-audio",
@@ -51,13 +56,14 @@
           "iosUrlScheme": "com.googleusercontent.apps.972933470054-ca7eragog9vsiq0kbl7i06ovupakr941"
         }
       ],
+      "expo-apple-authentication",
       "@livekit/react-native-expo-plugin",
       "@ethora/chat-component-rn",
       [
         "@config-plugins/react-native-webrtc",
         {
-          "cameraPermission": "$(PRODUCT_NAME) needs access to your camera so you can be seen during video calls and take photos for chats.",
-          "microphonePermission": "$(PRODUCT_NAME) needs access to your microphone for audio and video calls and voice messages."
+          "cameraPermission": "$(PRODUCT_NAME) uses the camera so you can take a photo or video and send it in a chat.",
+          "microphonePermission": "$(PRODUCT_NAME) uses the microphone to record voice messages you send in chats."
         }
       ],
       "./plugins/withAndroidReleaseSigning",
@@ -81,6 +87,10 @@
       "bundleIdentifier": "com.ethora.app",
       "appleTeamId": "822G3N7CA5",
       "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME) uses your photo library so you can pick photos and videos to send in chats and choose a chat picture. For example, you can attach a photo from your gallery to a message.",
+        "NSPhotoLibraryAddUsageDescription": "$(PRODUCT_NAME) saves a photo or video from a chat to your library when you tap Save.",
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) uses the camera so you can take a photo or video and send it in a chat.",
+        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) uses the microphone to record voice messages you send in chats.",
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
           "audio",
@@ -102,7 +112,7 @@
         "backgroundColor": "#7740CA"
       },
       "package": "com.ethora.mobile",
-      "versionCode": 6,
+      "versionCode": 7,
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.BLUETOOTH_CONNECT"
@@ -128,7 +138,7 @@
     "extra": {
       "push": {
         "buildOrigin": "platform",
-        "encrypted": true
+        "encrypted": false
       },
       "eas": {
         "projectId": "b79aedc2-ad0f-40ed-b8bd-4b54010d9f0f"

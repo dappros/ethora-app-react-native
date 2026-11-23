@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loginScreenBackgroundImage } from '@/src/core/docs/config';
 import {
+  AppleSignInButton,
   CreateAccountButton,
   GoogleSignInButton,
   RegularLoginLabel,
@@ -120,6 +121,7 @@ export default function Login() {
             </View>
 
             <View>
+              <AppleSignInButton />
               <GoogleSignInButton
                 backgroundColor={theme.buttonBackground}
                 textColor={theme.buttonText}
@@ -135,6 +137,20 @@ export default function Login() {
                 textColor={theme.text}
                 linkColor={showBrandBackground ? theme.text : theme.primary}
               />
+
+              <TouchableOpacity
+                onPress={() => router.push({ pathname: '/(auth)/terms', params: { mode: 'view' } })}
+                accessibilityLabel="Terms of Use"
+                hitSlop={8}
+                className="mt-4 items-center"
+              >
+                <Text
+                  className="text-xs"
+                  style={{ color: theme.text, fontFamily: 'VarelaRound-Regular', textDecorationLine: 'underline' }}
+                >
+                  Terms of Use
+                </Text>
+              </TouchableOpacity>
 
               {/* <View className="mt-11 items-center">
                 <SocialButtons />

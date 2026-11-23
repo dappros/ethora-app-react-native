@@ -11,6 +11,8 @@ export interface UseAuthReturn {
     login: (value: AuthLoginFetchDataValue) => Promise<AuthResponse>;
     /** Google sign-in; rejects with GoogleSignInCancelled when the user dismisses the sheet */
     loginWithGoogle: (value?: { utm?: string }) => Promise<AuthResponse>;
+    /** Sign in with Apple (iOS); rejects with AppleSignInCancelled when the user dismisses the sheet */
+    loginWithApple: (value?: { utm?: string }) => Promise<AuthResponse>;
     register: (value: AuthRegistrationFetchDataValue) => Promise<AuthResponse>;
     check: () => Promise<AuthResponse>;
     logout: () => Promise<void>;
