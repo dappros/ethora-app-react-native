@@ -126,14 +126,14 @@ export const createChatConfig = ({
     // The permission text comes from the expo-audio plugin in app.json.
     enableAudio: true,
     appId: currentUser?.appId,
-    // 1:1 audio/video calls over LiveKit, same settings as the web app
+    // 1:1 calls use P2P and group calls use LiveKit, matching the web app
     // (ethora-app-reactjs chatBootstrap.ts). Off unless EXPO_PUBLIC_VIDEO_CALLS_ENABLED
     // is 'true' and EXPO_PUBLIC_LIVEKIT_URL points at the LiveKit server of the
     // deployment. Needs a dev build: the LiveKit packages are native modules.
     videoCalls: {
       enabled: videoCallsEnabled,
       livekitUrl: LIVEKIT_URL,
-      allowedRoomTypes: ['private'],
+      allowedRoomTypes: ['private', 'group'],
       enableAudioCalls: true,
       startWithMicOn: true,
       // Android: call notification with hang up / mute / camera. iOS uses
